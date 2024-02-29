@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //
-// - Plug-In Shader - by Joshua: 2.8
+// - Plug-In Shader - by Joshua
 //   Base Shader: Simple Soft Shader by BeanManP
 // 
 //
@@ -382,25 +382,162 @@ float3x3 compute_tangent_frame(float3 Normal, float3 View, float2 UV)
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Edge Line
 
-float4 ColorRender_VS(float4 Pos : POSITION) : POSITION 
-{
-    // World view projection transformation of camera viewpoint
-    return mul( Pos, WorldViewProjMatrix );
-}
+struct BufferEdge_OUTPUT {
+    float4 Pos      : POSITION;
+	float3 Normal   : TEXCOORD2;
+};
 
+BufferEdge_OUTPUT ColorRender_VS(float4 Pos : POSITION, float3 Normal : NORMAL)
+{
+	BufferEdge_OUTPUT Out = (BufferEdge_OUTPUT)0;
+	
+	Out.Pos = mul( Pos, WorldViewProjMatrix );
+	
+	Out.Pos.xyz += Out.Normal;
+	Out.Pos.xyz *= 0.01 + 1;
+	
+    return Out;
+}
 // Pixel Shader
 float4 ColorRender_PS() : COLOR
 {
     // Edge Line Color
+	float4 EdgeColor = Edge_Line_Color;
     return EdgeColor;
 }
 
 // Techniques
 technique EdgeTec < string MMDPass = "edge"; > {
-    pass DrawEdge {
-        AlphaBlendEnable = FALSE;
-        AlphaTestEnable  = FALSE;
+	pass DrawEdge {
+		#if BLEND_APPLY == 1
+		
+		#if SRC_BLEND_TYPE == 0
+		SRCBLEND = ZERO;
+		#endif
+		#if SRC_BLEND_TYPE == 1
+		SRCBLEND = ONE;
+		#endif
+		#if SRC_BLEND_TYPE == 2
+		SRCBLEND = SrcColor;
+		#endif
+		#if SRC_BLEND_TYPE == 3
+		SRCBLEND = INVSrcColor;
+		#endif
+		#if SRC_BLEND_TYPE == 4
+		SRCBLEND = SrcAlpha;
+		#endif
+		#if SRC_BLEND_TYPE == 5
+		SRCBLEND = INVSrcAlpha;
+		#endif
+		#if SRC_BLEND_TYPE == 6
+		SRCBLEND = DestAlpha;
+		#endif
+		#if SRC_BLEND_TYPE == 7
+		SRCBLEND = INVDestAlpha;
+		#endif
+		#if SRC_BLEND_TYPE == 8
+		SRCBLEND = DestColor;
+		#endif
+		#if SRC_BLEND_TYPE == 9
+		SRCBLEND = INVDestColor;
+		#endif
 
+		#if DEST_BLEND_TYPE == 0
+		DESTBLEND = ZERO;
+		#endif
+		#if DEST_BLEND_TYPE == 1
+		DESTBLEND = ONE;
+		#endif
+		#if DEST_BLEND_TYPE == 2
+		DESTBLEND = SrcColor;
+		#endif
+		#if DEST_BLEND_TYPE == 3
+		DESTBLEND = INVSrcColor;
+		#endif
+		#if DEST_BLEND_TYPE == 4
+		DESTBLEND = SrcAlpha;
+		#endif
+		#if DEST_BLEND_TYPE == 5
+		DESTBLEND = INVSrcAlpha;
+		#endif
+		#if DEST_BLEND_TYPE == 6
+		DESTBLEND = DestAlpha;
+		#endif
+		#if DEST_BLEND_TYPE == 7
+		DESTBLEND = INVDestAlpha;
+		#endif
+		#if DEST_BLEND_TYPE == 8
+		DESTBLEND = DestColor;
+		#endif
+		#if DEST_BLEND_TYPE == 9
+		DESTBLEND = INVDestColor;
+		#endif
+		
+		#endif
+
+		#if ALPHA_BLEND_APPLY == 1
+		
+		#if ALPHA_BLEND_TYPE == 1
+		ALPHABLENDENABLE = FALSE;
+		#endif
+		
+		#if ALPHA_BLEND_TYPE == 2
+		ALPHABLENDENABLE = TRUE;
+		#endif
+		
+		#endif
+		
+		#if ALPHA_TEST_APPLY == 1
+		
+		#if ALPHA_TEST_TYPE == 1
+		ALPHATESTENABLE = FALSE;
+		#endif
+
+		#if ALPHA_TEST_TYPE == 2
+		ALPHATESTENABLE = TRUE;
+		#endif
+
+		#endif
+		
+		#if Z_WRITE_APPLY == 1
+		
+		#if Z_WRITE_TYPE == 1
+		ZWRITEENABLE = FALSE;
+		#endif
+		
+		#if Z_WRITE_TYPE == 2
+		ZWRITEENABLE = TRUE;
+		#endif
+		
+		#endif
+		
+		#if Z_ENABLE_APPLY == 1
+		
+		#if Z_TYPE == 1
+		ZENABLE = FALSE;
+		#endif
+		
+		#if Z_TYPE == 2
+		ZENABLE = TRUE;
+		#endif
+		
+		#endif
+		
+		#if CULLMODE_APPLY == 1
+		
+		#if CULLMODE_TYPE == 0
+		CULLMODE = NONE;
+		#endif
+		
+		#if CULLMODE_TYPE == 1
+		CULLMODE = CW;
+		#endif
+		
+		#if CULLMODE_TYPE == 2
+		CULLMODE = CCW;
+		#endif
+		
+		#endif
         VertexShader = compile vs_2_0 ColorRender_VS();
         PixelShader  = compile ps_2_0 ColorRender_PS();
     }
@@ -786,6 +923,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 
 	#if APPLY_NORMALMAP == 1
 	float3 NormalMap		= tex2D( NormalMapSampler, UV).xyz * 2;		
+	NormalMap				= NormalMap.xyz;
 	float3x3 tangentFrame	= compute_tangent_frame(Normal, Eye, IN.UV);
 	NormalMap.z				-= NormalMap_Intensity;
 	Normal					= normalize(mul(NormalMap.xyz - 1.0f, tangentFrame));
@@ -799,8 +937,6 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	#endif
 
 //////////////////////////////////////////////////
-//Specular
-
 	#if APPLY_ANISO == 0
 	#if APPLY_SPECULAR == 1
 	
@@ -811,6 +947,8 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	#if APPLY_SHADER_SPECULAR == 1
 	float3 Specular		= pow( max(0,dot( HalfVector, Normal )), Specular_Shininess );
 	#endif
+	
+	Specular = step( 0.5 , Specular) ? 1 : 0;
 	
 	#if APPLY_SPECULARMAP == 1
 	Specular.rgb		*= SpecularMap.rgb + SpecularMap.rgb;
@@ -851,9 +989,11 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	
 	#if APPLY_RIMLIGHT_TYPE == 1
 	#if APPLY_SHADER_SPECULAR == 1
-	float3 RimLight		= saturate(pow( 1 - dot(Normal, RimEye), 1 * Specular_Shininess * float(0.5) ) * float4(Specular_Color.rgb,0));
+	float4 RimLight		= saturate(pow( 1 - dot(Normal, RimEye), 1 * Specular_Shininess * float(0.5) ) * float4(Specular_Color.rgb,0));
 	#endif
 	#endif
+	
+	RimLight = step( 0.5 , RimLight) ? 1 : 0;
 	
 	#if APPLY_SPECULARMAP == 1
 	RimLight.rgb *= SpecularMap.rgb + SpecularMap.rgb;
@@ -882,6 +1022,8 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	#endif
 	
 	float4 RimLightC		= saturate(pow( 1 - dot(Normal, RimCEye), Custom_RimLight_Size / 10 ) * float4(Custom_RimLight_Color.rgb,0));
+	
+	RimLightC = step( 0.5 , RimLightC) ? 1 : 0;
 	
 	RimLightC.rgb *= 1.5 * LightAmbient;
 	
@@ -1006,6 +1148,8 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	float3 Fresnel = saturate(pow( 1 - dot(Normal, FresnelEye), 1 * Specular_Shininess * float(0.5) ) * Specular_Color.a);
 	#endif
 	
+	Fresnel = step( 0.5 , Fresnel) ? 1 : 0;
+	
 	#if APPLY_CUBEMAP == 1
 	float4 CubeMapF = texCUBE(CubeMapSampler, CubeMapReflection);
 	
@@ -1057,7 +1201,10 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	float4 ANISO_X = tex2D(Aniso_Samp, AnisoCoord);
 	
 	ANISO_X.yz = pow(ANISO_X.yz, Aniso_Size * 5);
-
+	
+	float3 ANISO_X_T = lerp(step( 1.0 , ANISO_X) ? 1 : 0, ANISO_X, step( 2.0 , ANISO_X) ? 1 : 0);
+	ANISO_X.rgb = lerp(ANISO_X,1,1 + -ANISO_X_T * 0.5);
+	
     float2 aniso_coef;
     aniso_coef = float2(dot(Normal, -LightDirection.xyz).xx) * float2(0.7, -0.7) + float2(0.3, 0.3);
     aniso_coef = ANISO_X.yz * clamp(aniso_coef, (0.0), (1.0)) * float2(0.18, 0.05);
@@ -1089,11 +1236,13 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	
 	#if APPLY_SHADER_SPECULAR == 0
 	Aniso = max(Aniso_Back, sin(radians((HdotA + 0) * 180)* Aniso_Size));
+	Aniso = lerp(Aniso,1,step( 0.5 , Aniso) ? 1 : 0);
 	Aniso.rgb *= SpecularColor;
 	#endif
 
 	#if APPLY_SHADER_SPECULAR == 1
 	Aniso = max(Aniso_Back, sin(radians((HdotA + 0) * 180)* Aniso_Size));
+	Aniso = lerp(Aniso,1,step( 0.5 , Aniso) ? 1 : 0);
 	Aniso.rgb *= Specular_Color;
 	#endif
 	
@@ -1492,7 +1641,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 		float U = SoftShadowParam / SHADOWMAP_SIZE;
 		float V = SoftShadowParam / SHADOWMAP_SIZE;
         if(parthf) {
-            // ƒZƒ‹ƒtƒVƒƒƒhƒE mode2
+            // ï¿½Zï¿½ï¿½ï¿½tï¿½Vï¿½ï¿½ï¿½hï¿½E mode2
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(0,0)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(U,0)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(-U,0)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
@@ -1503,7 +1652,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(-U,-V)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(U,-V)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
         } else {
-            // ƒZƒ‹ƒtƒVƒƒƒhƒE mode1
+            // ï¿½Zï¿½ï¿½ï¿½tï¿½Vï¿½ï¿½ï¿½hï¿½E mode1
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(0,0)).r , 0.0f)*SKII1-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(U,0)).r , 0.0f)*SKII1-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(-U,0)).r , 0.0f)*SKII1-0.3f);
@@ -1521,15 +1670,15 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 		
         ShadowComp = 1-saturate(ShadowComp/9);
 		ShadowComp = min(saturate(LightNormal * Toon), ShadowComp);
-
 //////////////////////////////////////////////////
 	if(HgShadow_Valid)
 	{
-        float comp = HgShadow_GetSelfShadowRate(IN.PPos);
-        if ( useToon ) 
+		float comp = HgShadow_GetSelfShadowRate(IN.PPos);
+		if ( useToon ) 
 		{
-         comp = min(saturate(LightNormal * Toon), comp);
-	     ShadowComp = comp;
+		comp = min(saturate(LightNormal * Toon), comp);
+		ShadowComp = comp;
+		ShadowComp = step( 0.5 , ShadowComp) ? 1 : 0;
 		}
 	}
 
@@ -1634,6 +1783,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	ShadowColor *= Toon_Intensity;
 	
 	Color.rgb  = lerp(Color.rgb * ShadowColor.rgb, Color.rgb, ShadowComp);
+	ShadowComp -= (ShadowComp < 0.1) ? 1 : 0 ;
 	
 //////////////////////////////////////////////////
 	
@@ -2196,7 +2346,7 @@ technique MainTecBS3  < string MMDPass = "object_ss"; bool UseTexture = true; bo
     }
 }
 
-// ƒIƒuƒWƒFƒNƒg•`‰æ—pƒeƒNƒjƒbƒNiPMDƒ‚ƒfƒ‹—pj
+// ï¿½Iï¿½uï¿½Wï¿½Fï¿½Nï¿½gï¿½`ï¿½ï¿½pï¿½eï¿½Nï¿½jï¿½bï¿½Nï¿½iPMDï¿½ï¿½ï¿½fï¿½ï¿½ï¿½pï¿½j
 technique MainTecBS4  < string MMDPass = "object_ss"; bool UseTexture = false; bool UseSphereMap = false; bool UseToon = true; > {
     pass DrawObject {
 		#if BLEND_APPLY == 1

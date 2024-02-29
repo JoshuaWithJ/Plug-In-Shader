@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //
-// - Plug-In Shader - by Joshua: 2.8
+// - Plug-In Shader - by Joshua
 //   Base Shader: Simple Soft Shader by BeanManP
 // 
 //
@@ -310,6 +310,20 @@ sampler IBLSampler3 = sampler_state {
     ADDRESSU  = CLAMP;
     ADDRESSV  = CLAMP;
     ADDRESSW  = CLAMP;
+};
+#endif
+
+
+//Eye Mask
+#if APPLY_EYEMASK == 1
+texture2D EyeMask <
+    string ResourceName = EyeMask_Texture
+    >;
+sampler EyeMask_Sampler = sampler_state {
+    texture   = <EyeMask>;
+    FILTER= ANISOTROPIC;
+    AddressU  = WRAP;
+    AddressV  = WRAP;
 };
 #endif
 
@@ -964,6 +978,50 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	#endif
 
 //////////////////////////////////////////////////
+//Specular 1
+	#if APPLY_ANISO == 0
+	float3 SpecularPos = 1;
+
+	float3 SpecularR = SpecularPos;
+	
+	SpecularPos.x -= Specular_Pos_X;
+	SpecularPos.y -= Specular_Pos_Y;
+	SpecularPos.x -= 1;
+	SpecularPos.y -= 1;
+	
+	float3 SpecularPose = mul(SpecularPos.xy, ViewMatrix);
+	
+	SpecularPose.x += LightDirection.x;
+	SpecularPose.y += LightDirection.y;
+	
+	float3 h = normalize(Eye + SpecularPose);
+	
+	h.x = -h.x;
+	h.y = -h.y;
+
+	#if APPLY_SHADER_SPECULAR == 0
+	float3 Specular1		= pow( max(0,dot(Normal,h)), SpecularPower * float(0.5) ) * SpecularColor;
+	Specular1 = step( 0.5 , Specular1) ? 1 : 0;
+	#endif
+	
+	#if APPLY_SHADER_SPECULAR == 1
+	float3 Specular1		= pow( max(0,dot(Normal,h)), Specular_Shininess * float(0.5));
+	Specular1 = step( 0.5 , Specular1) ? 1 : 0;
+	#endif
+	
+	#if APPLY_SPECULARMAP == 1
+	Specular1.rgb		*= SpecularMap.rgb + SpecularMap.rgb;
+	#endif
+	
+	#if APPLY_SHADER_SPECULAR == 1
+	Specular1.rgb *= Specular_Color.rgb;
+	#endif
+	
+	Specular1 *= 1.5 * LightAmbient;
+	
+	#endif
+	
+//////////////////////////////////////////////////
 //RimLight
 	
 	#if APPLY_RIMLIGHT_TYPE == 1
@@ -1389,9 +1447,8 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	Color.rgb = lerp(Color.rgb,1,Front_Light);
 	#endif
 	#if APPLY_ANISO == 0
-	#if APPLY_SPECULAR == 1
 	Color.rgb = lerp(Color.rgb,1,Specular);
-	#endif
+	Color.rgb = lerp(Color.rgb,1,Specular1);
 	#endif
 	#if APPLY_SPA == 1
 	Color.rgb = lerp(Color.rgb,1,SPAMap);
@@ -1425,9 +1482,8 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	Color.rgb += Front_Light;
 	#endif
 	#if APPLY_ANISO == 0
-	#if APPLY_SPECULAR == 1
 	Color.rgb += Specular;
-	#endif
+	Color.rgb += Specular1;
 	#endif
 	#if APPLY_SPA == 1
 	Color.rgb += SPAMap;
@@ -1516,65 +1572,6 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	#endif
 
 //////////////////////////////////////////////////
-
-		#if APPLY_TRANSPARENCY == 1
-		
-		float3 TRENDER = (pow( dot( Normal , Eye ), 1));
-		
-		float3 TEYEDIR = dot( Normal, -Eye.y);
-		float3 TEYEDIR1 = dot( Normal, Eye.y);
-		
-		#if TRANSPARENCY_COLOR_TYPE == 0
-		TransparencyMap.rgb	*= TransparencyMap + (0.9647058823529412, 0.8196078431372549, 0.7490196078431373);
-		#endif
-		
-		#if TRANSPARENCY_COLOR_TYPE == 1
-		TransparencyMap.rgb	*= TransparencyMap.rgb + Transparency_Color.rgb;
-		TransparencyMap.rgb	*= Transparency_Color.a;
-		#endif
-		
-		TRENDER = lerp( TRENDER.rgb, TRENDER.rgb, TRENDER.rgb + normalize(TEYEDIR * TEYEDIR1));
-		
-		TransparencyMap.rgb = lerp(TransparencyMap.rgb, TransparencyMap.rgb * TRENDER.rgb, Transparency_Intensity);
-		
-		Color.a   += TransparencyMap.a;
-		
-		Color.rgb = lerp(Color.rgb, Color.rgb * TransparencyMap.rgb, 1);
-		#endif
-
-//////////////////////////////////////////////////
-
-		#if APPLY_ALPHA_MASK == 1
-		Color.a   *= AlphaMask;
-		#endif
-	
-//////////////////////////////////////////////////
-	
-	#if APPLY_ALPHA == 1
-	Color.a *= DiffuseColor.a;
-	ShadowColor.a *= DiffuseColor.a;
-	
-	#if APPLY_VERTEXCOLOR == 1
-	Color.a *= VertexColor.a;
-	#endif
-	
-	#endif
-	
-//////////////////////////////////////////////////
-// Alpha Color
-	
-	#if APPLY_ALPHA == 1
-	#if APPLY_COLOR_ALPHA == 1
-	
-    if((Alpha_Color_Intensity) > 0.0f){
-	float len = length(Color.rgb - saturate(Alpha_Color));
-	if( len <= (Alpha_Color_Intensity) ) Color.a = 0;
-    }
-	
-	#endif
-	#endif
-
-//////////////////////////////////////////////////
 //Over Transparency
 		#if APPLY_OVER_TRANSPARENCY == 1
 		
@@ -1626,6 +1623,58 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 
 		#endif
 //////////////////////////////////////////////////
+
+		#if APPLY_TRANSPARENCY == 1
+		
+		float3 TRENDER = (pow( dot( Normal , Eye ), 1));
+		
+		float3 TEYEDIR = dot( Normal, -Eye.y);
+		float3 TEYEDIR1 = dot( Normal, Eye.y);
+		
+		#if TRANSPARENCY_COLOR_TYPE == 0
+		TransparencyMap.rgb	*= TransparencyMap + (0.9647058823529412, 0.8196078431372549, 0.7490196078431373);
+		#endif
+		
+		#if TRANSPARENCY_COLOR_TYPE == 1
+		TransparencyMap.rgb	*= TransparencyMap.rgb + Transparency_Color.rgb;
+		TransparencyMap.rgb	*= Transparency_Color.a;
+		#endif
+		
+		TRENDER = lerp( TRENDER.rgb, TRENDER.rgb, TRENDER.rgb + normalize(TEYEDIR * TEYEDIR1));
+		
+		TransparencyMap.rgb = lerp(TransparencyMap.rgb, TransparencyMap.rgb * TRENDER.rgb, Transparency_Intensity);
+		
+		Color.a   += TransparencyMap.a;
+		
+		Color.rgb = lerp(Color.rgb, Color.rgb * TransparencyMap.rgb, 1);
+		#endif
+
+//////////////////////////////////////////////////
+
+		#if APPLY_ALPHA_MASK == 1
+		Color.a   *= AlphaMask;
+		#endif
+	
+//////////////////////////////////////////////////
+
+	#if APPLY_EYEMASK == 1
+	float4 EyeMask = tex2D(EyeMask_Sampler, IN.UV);
+	Color = 1 * Color + EyeMask * EyeMask.a;
+	#endif
+	
+//////////////////////////////////////////////////
+	
+	#if APPLY_ALPHA == 1
+	Color.a *= DiffuseColor.a;
+	ShadowColor.a *= DiffuseColor.a;
+	
+	#if APPLY_VERTEXCOLOR == 1
+	Color.a *= VertexColor.a;
+	#endif
+	
+	#endif
+	
+//////////////////////////////////////////////////
 //Shadow
 //////////////////////////////////////////////////
     // Convert to texture coordinates
@@ -1641,7 +1690,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 		float U = SoftShadowParam / SHADOWMAP_SIZE;
 		float V = SoftShadowParam / SHADOWMAP_SIZE;
         if(parthf) {
-            // ƒZƒ‹ƒtƒVƒƒƒhƒE mode2
+            // ï¿½Zï¿½ï¿½ï¿½tï¿½Vï¿½ï¿½ï¿½hï¿½E mode2
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(0,0)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(U,0)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(-U,0)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
@@ -1652,7 +1701,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(-U,-V)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(U,-V)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
         } else {
-            // ƒZƒ‹ƒtƒVƒƒƒhƒE mode1
+            // ï¿½Zï¿½ï¿½ï¿½tï¿½Vï¿½ï¿½ï¿½hï¿½E mode1
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(0,0)).r , 0.0f)*SKII1-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(U,0)).r , 0.0f)*SKII1-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(-U,0)).r , 0.0f)*SKII1-0.3f);
@@ -1663,18 +1712,19 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(-U,-V)).r , 0.0f)*SKII1-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(U,-V)).r , 0.0f)*SKII1-0.3f);
         }
-        float LightNormal = dot(normalize(Normal), -LightDirection);
+        float LightNormal = dot(normalize(IN.Normal), -LightDirection);
 		
         float SHADSmooth = smoothstep(0.0, Toon_Smooth, 1);
         LightNormal = SHADSmooth * LightNormal;
 		
         ShadowComp = 1-saturate(ShadowComp/9);
 		ShadowComp = min(saturate(LightNormal * Toon), ShadowComp);
+
 //////////////////////////////////////////////////
 	if(HgShadow_Valid)
 	{
-		float comp = HgShadow_GetSelfShadowRate(IN.PPos);
-		if ( useToon ) 
+        float comp = HgShadow_GetSelfShadowRate(IN.PPos);
+        if ( useToon ) 
 		{
 		comp = min(saturate(LightNormal * Toon), comp);
 		ShadowComp = comp;
@@ -1731,7 +1781,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 
 //////////////////////////////////////////////////
 //Shadow Color
-	
+
 	#if APPLY_TINT == 0
 	#if APPLY_BACK_LIGHT == 1
 	ShadowColor.rgb =  lerp(ShadowColor.rgb,1,Back_Light.rgb);
@@ -2346,7 +2396,7 @@ technique MainTecBS3  < string MMDPass = "object_ss"; bool UseTexture = true; bo
     }
 }
 
-// ƒIƒuƒWƒFƒNƒg•`‰æ—pƒeƒNƒjƒbƒNiPMDƒ‚ƒfƒ‹—pj
+// ï¿½Iï¿½uï¿½Wï¿½Fï¿½Nï¿½gï¿½`ï¿½ï¿½pï¿½eï¿½Nï¿½jï¿½bï¿½Nï¿½iPMDï¿½ï¿½ï¿½fï¿½ï¿½ï¿½pï¿½j
 technique MainTecBS4  < string MMDPass = "object_ss"; bool UseTexture = false; bool UseSphereMap = false; bool UseToon = true; > {
     pass DrawObject {
 		#if BLEND_APPLY == 1
