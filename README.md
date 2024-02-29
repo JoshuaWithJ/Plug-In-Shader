@@ -67,10 +67,5 @@
 - Eye Mask by Joshua
 
 # SPECIALS THANKS: 💙
-- Infu_D: For features supports, guides, advice and general assistance.
-- Tuni-Kun, KH40 & FlyingSpirits: as i've learned through their shaders, work and advice.
-
-[Infu_D](https://github.com/Infused-Doggo)
-[FlyingSpirits](https://github.com/FlyingSpirits)
-[KH40](https://github.com/KH40-khoast40/)
-[Tuni-Kun](https://www.deviantart.com/tuni-kun)
+- [Infu_D](https://github.com/Infused-Doggo): For features supports, guides, advice and general assistance.
+- [Tuni-Kun](https://www.deviantart.com/tuni-kun), [KH40](https://github.com/KH40-khoast40/) & [FlyingSpirits](https://github.com/FlyingSpirits): as i've learned through their shaders, work and advice.
