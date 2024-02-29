@@ -40,7 +40,6 @@
 - You can Modify the Shader.
 - You can Distribute the shader with your models.
 - You can Distribute modified version of the shader. 
-
 - You cannot use it for commercial use.
 - You cannot Redistribute the original shader. (Intact shader)
 - You cannot claim it as yours.
@@ -70,3 +69,8 @@
 # SPECIALS THANKS: 💙
 - Infu_D: For features supports, guides, advice and general assistance.
 - Tuni-Kun, KH40 & FlyingSpirits: as i've learned through their shaders, work and advice.
+
+[Infu_D](https://github.com/Infused-Doggo)
+[FlyingSpirits](https://github.com/FlyingSpirits)
+[KH40](https://github.com/KH40-khoast40/)
+[Tuni-Kun](https://www.deviantart.com/tuni-kun)
