@@ -21,7 +21,7 @@
 - Direct3D 9 With Shader Model 3.0 (ps_3_0)
 
 # FEATURES: 💙
-- Vanilla MMD.
+- Vanilla MMD Features.
 - Shader Styles.
 - ToneMap & Controller.
 - Alpha Mask.
