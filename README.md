@@ -11,30 +11,58 @@
 - **ERRORS MAY OCCUR, IF YOU FIND ANY PLEASE LET ME KNOW**
 
 # FEATURES:
-- Vanilla MMD options.
+- Vanilla MMD.
 - Shader Styles.
+- ToneMap & Controller.
+- Alpha Mask.
+- Alpha Color Channel.
+- Transparency Mask.
 - Normal Map.
 - Specular Map.
+- Anisotropic / Specular Lighting.
 - Environment Maps.
 - Refraction.
 - Different Type of RimLights.
-- ToneMap & Controller.
 - HeightMap / Parallax.
 - Subsurfacetoon.
-- Anisotropic / Specular Lighting.
 - Image Based Lighting / IBL.
 - Vertex Color.
-- 
+- Ambient Occlussion.
+- Blending Modes.
+
 # RULES:
-You are free to use it in any kind or type of models.
-You can Modify the Shader.
-You can Distribute the shader with your models.
-You can Distribute modified version of the shader. 
+- You are free to use it in any kind or type of models.
+- You can Modify the Shader.
+- You can Distribute the shader with your models.
+- You can Distribute modified version of the shader. 
 
-You cannot use it for commercial use.
-You cannot Redistribute the original shader. (Intact shader)
-You cannot claim it as yours.
+- You cannot use it for commercial use.
+- You cannot Redistribute the original shader. (Intact shader)
+- You cannot claim it as yours.
 
-And lastly Please give proper credit or at least type name the shader in the credits.
+- And lastly Please give proper credit or at least type name the shader in the credits.
 
-# CREDITS:
+# PLUG-IN SHADER CREDITS:
+
+- Mixing of shaders by Joshua
+- General Guide / Help: Ben Cloward
+- Base shader by BeanManP
+- ToneMap by Skyth / Joshua
+- Normal Map by LessThanEqual
+- SpecularMap by Joshua
+- RimLight by Joshua
+- Fresnel by Joshua
+- Alpha Channel Options by KH40 / Joshua
+- HgShadow by 針金P
+- Blend Options Support by Joshua
+- Anisotropic by Farfarer / Infu_D / Joshua
+- HeightMap by FlyingSpirits / Rui
+- IBL by Infussed Doggo / Joshua
+- SubSurfaceToon by Infu_D / Joshua
+- Transparency Mask by Joshua
+- Alpha Mask by Joshua
+- Eye Mask by Joshua
+
+# SPECIALS THANKS
+- Infu_D: For features supports, guides, advice and general assistance.
+- Tuni-Kun, KH40 & FlyingSpirits: as i've learned through their shaders, work and advice.
