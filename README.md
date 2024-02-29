@@ -65,7 +65,7 @@
 - Blend Options Support by Joshua
 - Anisotropic by Farfarer / Infu_D / Joshua
 - HeightMap by FlyingSpirits / Rui
-- IBL by Infussed Doggo / Joshua
+- IBL by Infu_D / Joshua
 - SubSurfaceToon by Infu_D / Joshua
 - Transparency Mask by Joshua
 - Alpha Mask by Joshua
