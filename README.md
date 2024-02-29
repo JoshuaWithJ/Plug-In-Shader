@@ -15,6 +15,11 @@
 ﻿
 - **ERRORS MAY OCCUR, IF YOU FIND ANY PLEASE LET ME KNOW**
 
+# REQUIREMENTS: 💙
+- [MikuMikuDance](https://learnmmd.com/downloads/) - 926ver (x64)
+- [MikuMikuEffect](https://learnmmd.com/downloads/) - 037ver (x64)
+- Direct3D 9 With Shader Model 3.0 (ps_3_0)
+
 # FEATURES: 💙
 - Vanilla MMD.
 - Shader Styles.
@@ -34,11 +39,6 @@
 - Vertex Color.
 - Ambient Occlussion.
 - Blending Modes.
-
-# REQUIREMENTS: 💙
-- [MikuMikuDance](https://learnmmd.com/downloads/) - 926ver (x64)
-- [MikuMikuEffect](https://learnmmd.com/downloads/) - 037ver (x64)
-- Direct3D 9 With Shader Model 3.0 (ps_3_0)
 
 # RULES: 💙
 - You are free to use it in any kind or type of models.
