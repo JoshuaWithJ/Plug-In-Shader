@@ -1,7 +1,7 @@
-# PLUG-IN
+# PLUG-IN 💙
 ![](https://media.discordapp.net/attachments/1161871806450376786/1204957523019431937/PDFTDX_Default_Miku_Shader_Release_2-8_Render.png?ex=65f24ea4&is=65dfd9a4&hm=dbbf00b67ef79092a9a9097d699b88f077ac3497a8470c0f490e92732d9fc92e&=&format=webp&quality=lossless&width=550&height=309)
 
-# NOTES: 
+# NOTES: 💙
 - **TONEMAP IS EXTREMLY RECOMMENDED TO USE!**
 ﻿
 - **HG SHADOW IS EXTREMELY RECOMMEND TO USE!**
@@ -10,7 +10,7 @@
 ﻿
 - **ERRORS MAY OCCUR, IF YOU FIND ANY PLEASE LET ME KNOW**
 
-# FEATURES:
+# FEATURES: 💙
 - Vanilla MMD.
 - Shader Styles.
 - ToneMap & Controller.
@@ -30,7 +30,12 @@
 - Ambient Occlussion.
 - Blending Modes.
 
-# RULES:
+# REQUIREMENTS: 💙
+- MikuMikuDance - 926ver (x64)
+- MikuMikuEffect - 037ver (x64)
+- Direct3D 9 With Shader Model 3.0 (ps_3_0)
+
+# RULES: 💙
 - You are free to use it in any kind or type of models.
 - You can Modify the Shader.
 - You can Distribute the shader with your models.
@@ -42,8 +47,7 @@
 
 - And lastly Please give proper credit or at least type name the shader in the credits.
 
-# PLUG-IN SHADER CREDITS:
-
+# PLUG-IN SHADER CREDITS: 💙
 - Mixing of shaders by Joshua
 - General Guide / Help: Ben Cloward
 - Base shader by BeanManP
@@ -63,6 +67,6 @@
 - Alpha Mask by Joshua
 - Eye Mask by Joshua
 
-# SPECIALS THANKS
+# SPECIALS THANKS: 💙
 - Infu_D: For features supports, guides, advice and general assistance.
 - Tuni-Kun, KH40 & FlyingSpirits: as i've learned through their shaders, work and advice.
