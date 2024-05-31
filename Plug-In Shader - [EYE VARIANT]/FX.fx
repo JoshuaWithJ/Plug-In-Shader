@@ -216,6 +216,8 @@ float3 SubSurfaceToon_Color		= float3(1.0,0.0,0.0);
 
 #define APPLY_SUBSURFACETOON_FILTER_SHADOW 0
 
+float SubSurfaceToon_Intensity = 1.0;
+
 float SubSurfaceToon_Saturation = 1.0;
 
 //////////////////////////////////////////////////////////////////////////////////////
