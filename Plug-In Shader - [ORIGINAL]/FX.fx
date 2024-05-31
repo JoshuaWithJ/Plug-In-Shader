@@ -5,11 +5,11 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////
 // ToneMap
-#define APPLY_TONE_MAP	0
+#define APPLY_TONE_MAP	1
 
 float Tone_Map_Intensity    = 1.0;
 
-float Exposure    = 1.0;
+float Exposure    = 2.0;
 float Saturation = 1.0;
 float Gama = 1.0;
 
@@ -24,10 +24,10 @@ float Gama = 1.0;
 //TYPE 0 = Simple Soft Shader
 //TYPE 1 = Half Lambert shader (EDITED)
 
-#define SHADER_TYPE 0
+#define SHADER_TYPE 1
 //////////////////////////////////////////////////////////////////////////////////////
 // Shadow Color
-#define APPLY_SHADER_SHADOW_COLOR 0
+#define APPLY_SHADER_SHADOW_COLOR 1
 float4 Shadow_Color = float4(1.0,1.0,1.0,1.0);
 
 // Soft Shadow Blur
@@ -43,11 +43,11 @@ float Reflection_Shadow_Effect_Intensity = 1.0;
 
 //////////////////////////////////////////////////////////////////////////////////////
 //Texture
-float Texture_Brightness = 1.0;
+float Texture_Brightness = 1.5;
 
 // Toon
-float Toon_Gradient = 1.0;
-float Toon_Smooth = 1.0;
+float Toon_Gradient = 2.0;
+float Toon_Smooth = 2.0;
 float Toon_Intensity = 1.0;
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -75,7 +75,7 @@ float Front_Light_Size   = 1.0;
 #define NormalMap_Texture "n.png";
 
 #define FLIP_NORMALMAP 0
-float NormalMap_Intensity = 0.0;
+float NormalMap_Intensity = 0.5;
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Specular Map
@@ -119,6 +119,11 @@ float4 Transparency_Color = float4(1, 1, 1, 1);
 #define APPLY_ALPHA_MASK_UV 0
 #define Alpha_Mask_Texture "A.png";
 
+#define APPLY_ALPHA_MASK_RGB_CHANNELS 0
+
+#define R_CHANNEL_ALPHA_MASK 0
+#define G_CHANNEL_ALPHA_MASK 0
+#define B_CHANNEL_ALPHA_MASK 0
 //////////////////////////////////////////////////////////////////////////////////////
 // OVER TRANSPARENCY
 
@@ -186,7 +191,7 @@ float Refraction_Index		= 1.0;
 
 #define APPLY_RIMLIGHT_TYPE 0
 
-#define APPLY_RIMLIGHT_LIGHT_DIRECTION 0
+#define APPLY_RIMLIGHT_LIGHT_DIRECTION 1
 
 float Custom_RimLight_Size = 1.0;
 
@@ -206,9 +211,7 @@ float3 SubSurfaceToon_Color		= float3(1.0,0.0,0.0);
 //////////////////////////////////////////////////////////////////////////////////////
 // SubSurfaceToon Filter
 
-#define APPLY_SUBSURFACETOON_FILTER_SHADOW 1
-
-float SubSurfaceToon_Intensity = 1.0;
+#define APPLY_SUBSURFACETOON_FILTER_SHADOW 0
 
 float SubSurfaceToon_Saturation = 1.0;
 
@@ -248,12 +251,20 @@ float VertexColor_Intensity = 1.0;
 
 #define AMBIENTOCCLUSSION_TYPE 1
 
+#define APPLY_AMBIENTOCCLUSSION_RGB_CHANNELS 0
+
+#define R_CHANNEL_AMBIENTOCCLUSSION 0
+#define G_CHANNEL_AMBIENTOCCLUSSION 0
+#define B_CHANNEL_AMBIENTOCCLUSSION 0
+
+float Ambient_Occlussion_Intensity = 1.0;
+
 //////////////////////////////////////////////////////////////////////////////////////
 // IBL
 
 #define APPLY_IBL 0
-#define APPLY_IBL_SPECULAR 0
-#define APPLY_IBL_LIGHT_DIRECTION 0
+#define APPLY_IBL_SPECULAR 1
+#define APPLY_IBL_LIGHT_DIRECTION 1
 #define APPLY_IBL_LIGHT_AMBIENT 0
 
 // IBL TEXTURE
@@ -303,7 +314,7 @@ float IBL_Brightness = 1.0;
 #define Z_ENABLE_APPLY		0
 
 #define Z_WRITE_TYPE		0
-#define Z_ENABLE_APPLY		0
+#define Z_TYPE				0
 
 ///////////////////////////////////////////////
 // CullMode
