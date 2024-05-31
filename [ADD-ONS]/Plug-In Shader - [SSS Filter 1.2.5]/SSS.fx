@@ -1,6 +1,6 @@
 //==============================//
 //
-// - Plug-In Shader SSS Filter - By Infussed Doggo, Joshua: 1.2.5
+// - Plug-In Shader SSS Filter - By Infussed Doggo, Joshua
 //
 //==============================//
 	
@@ -309,7 +309,7 @@ float4 ps_model(vs_out i) : COLOR0
   r0.xyz = rcp(r4.xyz);
   r0.xyz = r3.xyz * r0.xyz;
   o0.xyz = g_color.xyz * r0.xyz;
-  return float4(o0.xyz * (saturate(o0.xyz) * 1.2), 1);
+  return float4(o0.xyz * o0.xyz * float(1.25), 1);
 }
 
 float4 ps_expand(vs_out i) : COLOR0

@@ -19,31 +19,28 @@ float SoftShadowParam = 0.5;
 // Shadow Size
 #define SHADOWMAP_SIZE 1024
 
+// Shadow Affecting Specular Reflection
+#define SHADOW_AFFECT_SPECULAR_REFLECTIONS 0
+
+float Reflection_Shadow_Effect_Intensity = 1.0;
+
 // Toon
 float Toon_Gradient = 2.0;
 float Toon_Smooth = 1.5;
-float Toon_Intensity = 0.6;
-
-//////////////////////////////////////////////////////////////////////////////////////
-// Normal Map
-
-#define APPLY_NORMALMAP  0
-#define APPLY_ANIMATED_NORMALMAP 0
-#define NormalMap_Texture "n.png";
-
-#define FLIP_NORMALMAP 0
-float NormalMap_Intensity = 0.0;
+float Toon_Intensity = 0.7;
 
 //////////////////////////////////////////////////////////////////////////////////////
 // IBL
 
 #define APPLY_IBL 1
 #define APPLY_IBL_LIGHT_DIRECTION 1
+#define APPLY_IBL_LIGHT_AMBIENT 0
 
 // IBL TEXTURE
 #define IBL_Texture "IBL/IBL.dds";
 
-float IBL_Intensity = 0.3;
+float IBL_Intensity = 0.25;
+float IBL_Shadow_Intensity = 0.25;
 float IBL_Brightness = 1.5;
 
 //////////////////////////////////////////////////////////////////////////////////////

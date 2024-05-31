@@ -42,6 +42,8 @@ float4x4 WorldMatrix				: WORLD;
 float4x4 ViewMatrix					: VIEW;
 float4x4 LightWorldViewProjMatrix	: WORLDVIEWPROJECTION < string Object = "Light"; >;
 
+// Light Color
+float3   LightAmbient      : AMBIENT   < string Object = "Light"; >;
 float3   LightDirection    : DIRECTION < string Object = "Light"; >;
 float3   CameraPosition    : POSITION  < string Object = "Camera"; >;
 
@@ -146,7 +148,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 //////////////////////////////////////////////////
 	
 	float3x3 RotationTransform;
-	
+
 	float length1 = length(LightDirection.xyz * float3(-1, 1, -1));
     if (length1 >= 0.000001f) {
         float3 cube_direction = (LightDirection.xyz * float3(-1, 1, -1)) * (1.0f / length1);
@@ -171,48 +173,6 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 		}
 	}
 
-//////////////////////////////////////////////////
-// IBL
-
-	#if APPLY_IBL == 1
-	
-	#if APPLY_IBL_LIGHT_DIRECTION == 0
-	float3 IBLPos = Normal;
-	#endif
-	
-	#if APPLY_IBL_LIGHT_DIRECTION == 1
-    float IBLrot_x = radians(45);
-    float IBLrot_y = radians(-45);
-    float IBLrot_z = radians(0);
-	float3x3 IBLRotationX = {
-	    {1,	0,	0},
-	    {0, cos(IBLrot_x), sin(IBLrot_x)},
-	    {0, -sin(IBLrot_x), cos(IBLrot_x)},
-	};
-	float3x3 IBLRotationY = {
-	    {cos(IBLrot_y), 0, -sin(IBLrot_y)},
-	    {0, 1, 0},
-		{sin(IBLrot_y), 0,cos(IBLrot_y)},
-	    };
-	float3x3 IBLRotationZ = {
-	    {cos(IBLrot_z), sin(IBLrot_z), 0},
-	    {-sin(IBLrot_z), cos(IBLrot_z), 0},
-	    {0, 0, 1},
-	};
-	float3x3 IBLRot = RotationTransform;
-    IBLRot = mul( IBLRot, IBLRotationX );
-    IBLRot = mul( IBLRot, IBLRotationY );
-    IBLRot = mul( IBLRot, IBLRotationZ );
-	float3 IBLPos = mul(Normal, (float3x3)IBLRot);
-	#endif
-	
-	float4 IBL = texCUBElod(IBLSampler, float4(1 + IBLPos, 0)) * IBL_Brightness;
-	
-	Color.rgb = lerp(Color.rgb, Color.rgb * IBL.rgb,IBL_Intensity);
-	
-	#endif
-
-	
 //////////////////////////////////////////////////
 //Shadow
 //////////////////////////////////////////////////
@@ -271,6 +231,60 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	}
 
 //////////////////////////////////////////////////
+// IBL
+
+	#if APPLY_IBL == 1
+	
+	#if APPLY_IBL_LIGHT_DIRECTION == 0
+	float3 IBLPos = Normal * float3(1,1,-1);
+	#endif
+	
+	#if APPLY_IBL_LIGHT_DIRECTION == 1
+    float IBLrot_x = radians(22.5);
+    float IBLrot_y = radians(-22.5);
+    float IBLrot_z = radians(45);
+	float3x3 IBLRotationX = {
+	    {1,	0,	0},
+	    {0, cos(IBLrot_x), sin(IBLrot_x)},
+	    {0, -sin(IBLrot_x), cos(IBLrot_x)},
+	};
+	float3x3 IBLRotationY = {
+	    {cos(IBLrot_y), 0, -sin(IBLrot_y)},
+	    {0, 1, 0},
+		{sin(IBLrot_y), 0,cos(IBLrot_y)},
+	    };
+	float3x3 IBLRotationZ = {
+	    {cos(IBLrot_z), sin(IBLrot_z), 0},
+	    {-sin(IBLrot_z), cos(IBLrot_z), 0},
+	    {0, 0, 1},
+	};
+	float3x3 IBLRot = RotationTransform;
+    IBLRot = mul( IBLRot, IBLRotationX );
+    IBLRot = mul( IBLRot, IBLRotationY );
+    IBLRot = mul( IBLRot, IBLRotationZ );
+	float3 IBLPos = mul(Normal* float3(1,1,-1), (float3x3)IBLRot);
+	#endif
+	
+	float4 IBL = texCUBElod(IBLSampler, float4( IBLPos, 0)) * 0.5 * IBL_Brightness;
+	float4 IBL1 = texCUBElod(IBLSampler, float4( IBLPos, 0)) * 1.25 * IBL_Brightness;
+	
+	#if APPLY_IBL_LIGHT_AMBIENT == 1
+	
+	IBL.rgb *= LightAmbient.rgb + 0.5;
+	IBL1.rgb *= LightAmbient.rgb + 0.5;
+	
+	#endif
+	
+	float3 IBL_B		= pow( max(0,dot( (LightDirection * float3 (1.0,-1.0,1.0)), Normal )), 1 );
+	IBL1.rgb *= IBL_B.rgb;
+	
+	Color.rgb = lerp(Color.rgb, Color.rgb * IBL.rgb, 0.25 * IBL_Intensity);
+	ShadowColor.rgb = lerp(ShadowColor.rgb, ShadowColor.rgb + IBL1,IBL_Shadow_Intensity);
+	
+	#endif
+
+	
+//////////////////////////////////////////////////
 
 	#if SHADER_TYPE == 1
 	float3 HalfLambert = min(pow(dot(Normal, -LightDirection) * 0.5 + 0.5, 2) * 0.5 + 0.5, (1,1,ShadowComp));
@@ -298,135 +312,6 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 // Techniques
 technique MainTecBS0  < string MMDPass = "object_ss"; bool UseTexture = false; bool UseSphereMap = false; bool UseToon = false; > {
     pass DrawObject {
-		#if BLEND_APPLY == 1
-		
-		#if SRC_BLEND_TYPE == 0
-		SRCBLEND = ZERO;
-		#endif
-		#if SRC_BLEND_TYPE == 1
-		SRCBLEND = ONE;
-		#endif
-		#if SRC_BLEND_TYPE == 2
-		SRCBLEND = SrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 3
-		SRCBLEND = INVSrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 4
-		SRCBLEND = SrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 5
-		SRCBLEND = INVSrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 6
-		SRCBLEND = DestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 7
-		SRCBLEND = INVDestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 8
-		SRCBLEND = DestColor;
-		#endif
-		#if SRC_BLEND_TYPE == 9
-		SRCBLEND = INVDestColor;
-		#endif
-
-		#if DEST_BLEND_TYPE == 0
-		DESTBLEND = ZERO;
-		#endif
-		#if DEST_BLEND_TYPE == 1
-		DESTBLEND = ONE;
-		#endif
-		#if DEST_BLEND_TYPE == 2
-		DESTBLEND = SrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 3
-		DESTBLEND = INVSrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 4
-		DESTBLEND = SrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 5
-		DESTBLEND = INVSrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 6
-		DESTBLEND = DestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 7
-		DESTBLEND = INVDestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 8
-		DESTBLEND = DestColor;
-		#endif
-		#if DEST_BLEND_TYPE == 9
-		DESTBLEND = INVDestColor;
-		#endif
-		
-		#endif
-
-		#if ALPHA_BLEND_APPLY == 1
-		
-		#if ALPHA_BLEND_TYPE == 1
-		ALPHABLENDENABLE = FALSE;
-		#endif
-		
-		#if ALPHA_BLEND_TYPE == 2
-		ALPHABLENDENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if ALPHA_TEST_APPLY == 1
-		
-		#if ALPHA_TEST_TYPE == 1
-		ALPHATESTENABLE = FALSE;
-		#endif
-
-		#if ALPHA_TEST_TYPE == 2
-		ALPHATESTENABLE = TRUE;
-		#endif
-
-		#endif
-		
-		#if Z_WRITE_APPLY == 1
-		
-		#if Z_WRITE_TYPE == 1
-		ZWRITEENABLE = FALSE;
-		#endif
-		
-		#if Z_WRITE_TYPE == 2
-		ZWRITEENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if Z_ENABLE_APPLY == 1
-		
-		#if Z_TYPE == 1
-		ZENABLE = FALSE;
-		#endif
-		
-		#if Z_TYPE == 2
-		ZENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if CULLMODE_APPLY == 1
-		
-		#if CULLMODE_TYPE == 0
-		CULLMODE = NONE;
-		#endif
-		
-		#if CULLMODE_TYPE == 1
-		CULLMODE = CW;
-		#endif
-		
-		#if CULLMODE_TYPE == 2
-		CULLMODE = CCW;
-		#endif
-		
-		#endif
         VertexShader = compile vs_3_0 BufferShadow_VS(false, false, false);
         PixelShader  = compile ps_3_0 BufferShadow_PS(false, false, false);
     }
@@ -434,135 +319,6 @@ technique MainTecBS0  < string MMDPass = "object_ss"; bool UseTexture = false; b
 
 technique MainTecBS1  < string MMDPass = "object_ss"; bool UseTexture = true; bool UseSphereMap = false; bool UseToon = false; > {
     pass DrawObject {
-		#if BLEND_APPLY == 1
-		
-		#if SRC_BLEND_TYPE == 0
-		SRCBLEND = ZERO;
-		#endif
-		#if SRC_BLEND_TYPE == 1
-		SRCBLEND = ONE;
-		#endif
-		#if SRC_BLEND_TYPE == 2
-		SRCBLEND = SrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 3
-		SRCBLEND = INVSrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 4
-		SRCBLEND = SrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 5
-		SRCBLEND = INVSrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 6
-		SRCBLEND = DestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 7
-		SRCBLEND = INVDestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 8
-		SRCBLEND = DestColor;
-		#endif
-		#if SRC_BLEND_TYPE == 9
-		SRCBLEND = INVDestColor;
-		#endif
-
-		#if DEST_BLEND_TYPE == 0
-		DESTBLEND = ZERO;
-		#endif
-		#if DEST_BLEND_TYPE == 1
-		DESTBLEND = ONE;
-		#endif
-		#if DEST_BLEND_TYPE == 2
-		DESTBLEND = SrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 3
-		DESTBLEND = INVSrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 4
-		DESTBLEND = SrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 5
-		DESTBLEND = INVSrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 6
-		DESTBLEND = DestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 7
-		DESTBLEND = INVDestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 8
-		DESTBLEND = DestColor;
-		#endif
-		#if DEST_BLEND_TYPE == 9
-		DESTBLEND = INVDestColor;
-		#endif
-		
-		#endif
-
-		#if ALPHA_BLEND_APPLY == 1
-		
-		#if ALPHA_BLEND_TYPE == 1
-		ALPHABLENDENABLE = FALSE;
-		#endif
-		
-		#if ALPHA_BLEND_TYPE == 2
-		ALPHABLENDENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if ALPHA_TEST_APPLY == 1
-		
-		#if ALPHA_TEST_TYPE == 1
-		ALPHATESTENABLE = FALSE;
-		#endif
-
-		#if ALPHA_TEST_TYPE == 2
-		ALPHATESTENABLE = TRUE;
-		#endif
-
-		#endif
-		
-		#if Z_WRITE_APPLY == 1
-		
-		#if Z_WRITE_TYPE == 1
-		ZWRITEENABLE = FALSE;
-		#endif
-		
-		#if Z_WRITE_TYPE == 2
-		ZWRITEENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if Z_ENABLE_APPLY == 1
-		
-		#if Z_TYPE == 1
-		ZENABLE = FALSE;
-		#endif
-		
-		#if Z_TYPE == 2
-		ZENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if CULLMODE_APPLY == 1
-		
-		#if CULLMODE_TYPE == 0
-		CULLMODE = NONE;
-		#endif
-		
-		#if CULLMODE_TYPE == 1
-		CULLMODE = CW;
-		#endif
-		
-		#if CULLMODE_TYPE == 2
-		CULLMODE = CCW;
-		#endif
-		
-		#endif
         VertexShader = compile vs_3_0 BufferShadow_VS(true, false, false);
         PixelShader  = compile ps_3_0 BufferShadow_PS(true, false, false);
     }
@@ -570,135 +326,6 @@ technique MainTecBS1  < string MMDPass = "object_ss"; bool UseTexture = true; bo
 
 technique MainTecBS2  < string MMDPass = "object_ss"; bool UseTexture = false; bool UseSphereMap = true; bool UseToon = false; > {
     pass DrawObject {
-		#if BLEND_APPLY == 1
-		
-		#if SRC_BLEND_TYPE == 0
-		SRCBLEND = ZERO;
-		#endif
-		#if SRC_BLEND_TYPE == 1
-		SRCBLEND = ONE;
-		#endif
-		#if SRC_BLEND_TYPE == 2
-		SRCBLEND = SrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 3
-		SRCBLEND = INVSrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 4
-		SRCBLEND = SrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 5
-		SRCBLEND = INVSrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 6
-		SRCBLEND = DestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 7
-		SRCBLEND = INVDestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 8
-		SRCBLEND = DestColor;
-		#endif
-		#if SRC_BLEND_TYPE == 9
-		SRCBLEND = INVDestColor;
-		#endif
-
-		#if DEST_BLEND_TYPE == 0
-		DESTBLEND = ZERO;
-		#endif
-		#if DEST_BLEND_TYPE == 1
-		DESTBLEND = ONE;
-		#endif
-		#if DEST_BLEND_TYPE == 2
-		DESTBLEND = SrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 3
-		DESTBLEND = INVSrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 4
-		DESTBLEND = SrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 5
-		DESTBLEND = INVSrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 6
-		DESTBLEND = DestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 7
-		DESTBLEND = INVDestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 8
-		DESTBLEND = DestColor;
-		#endif
-		#if DEST_BLEND_TYPE == 9
-		DESTBLEND = INVDestColor;
-		#endif
-		
-		#endif
-
-		#if ALPHA_BLEND_APPLY == 1
-		
-		#if ALPHA_BLEND_TYPE == 1
-		ALPHABLENDENABLE = FALSE;
-		#endif
-		
-		#if ALPHA_BLEND_TYPE == 2
-		ALPHABLENDENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if ALPHA_TEST_APPLY == 1
-		
-		#if ALPHA_TEST_TYPE == 1
-		ALPHATESTENABLE = FALSE;
-		#endif
-
-		#if ALPHA_TEST_TYPE == 2
-		ALPHATESTENABLE = TRUE;
-		#endif
-
-		#endif
-		
-		#if Z_WRITE_APPLY == 1
-		
-		#if Z_WRITE_TYPE == 1
-		ZWRITEENABLE = FALSE;
-		#endif
-		
-		#if Z_WRITE_TYPE == 2
-		ZWRITEENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if Z_ENABLE_APPLY == 1
-		
-		#if Z_TYPE == 1
-		ZENABLE = FALSE;
-		#endif
-		
-		#if Z_TYPE == 2
-		ZENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if CULLMODE_APPLY == 1
-		
-		#if CULLMODE_TYPE == 0
-		CULLMODE = NONE;
-		#endif
-		
-		#if CULLMODE_TYPE == 1
-		CULLMODE = CW;
-		#endif
-		
-		#if CULLMODE_TYPE == 2
-		CULLMODE = CCW;
-		#endif
-		
-		#endif
         VertexShader = compile vs_3_0 BufferShadow_VS(false, true, false);
         PixelShader  = compile ps_3_0 BufferShadow_PS(false, true, false);
     }
@@ -706,135 +333,6 @@ technique MainTecBS2  < string MMDPass = "object_ss"; bool UseTexture = false; b
 
 technique MainTecBS3  < string MMDPass = "object_ss"; bool UseTexture = true; bool UseSphereMap = true; bool UseToon = false; > {
     pass DrawObject {
-		#if BLEND_APPLY == 1
-		
-		#if SRC_BLEND_TYPE == 0
-		SRCBLEND = ZERO;
-		#endif
-		#if SRC_BLEND_TYPE == 1
-		SRCBLEND = ONE;
-		#endif
-		#if SRC_BLEND_TYPE == 2
-		SRCBLEND = SrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 3
-		SRCBLEND = INVSrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 4
-		SRCBLEND = SrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 5
-		SRCBLEND = INVSrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 6
-		SRCBLEND = DestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 7
-		SRCBLEND = INVDestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 8
-		SRCBLEND = DestColor;
-		#endif
-		#if SRC_BLEND_TYPE == 9
-		SRCBLEND = INVDestColor;
-		#endif
-
-		#if DEST_BLEND_TYPE == 0
-		DESTBLEND = ZERO;
-		#endif
-		#if DEST_BLEND_TYPE == 1
-		DESTBLEND = ONE;
-		#endif
-		#if DEST_BLEND_TYPE == 2
-		DESTBLEND = SrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 3
-		DESTBLEND = INVSrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 4
-		DESTBLEND = SrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 5
-		DESTBLEND = INVSrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 6
-		DESTBLEND = DestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 7
-		DESTBLEND = INVDestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 8
-		DESTBLEND = DestColor;
-		#endif
-		#if DEST_BLEND_TYPE == 9
-		DESTBLEND = INVDestColor;
-		#endif
-		
-		#endif
-
-		#if ALPHA_BLEND_APPLY == 1
-		
-		#if ALPHA_BLEND_TYPE == 1
-		ALPHABLENDENABLE = FALSE;
-		#endif
-		
-		#if ALPHA_BLEND_TYPE == 2
-		ALPHABLENDENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if ALPHA_TEST_APPLY == 1
-		
-		#if ALPHA_TEST_TYPE == 1
-		ALPHATESTENABLE = FALSE;
-		#endif
-
-		#if ALPHA_TEST_TYPE == 2
-		ALPHATESTENABLE = TRUE;
-		#endif
-
-		#endif
-		
-		#if Z_WRITE_APPLY == 1
-		
-		#if Z_WRITE_TYPE == 1
-		ZWRITEENABLE = FALSE;
-		#endif
-		
-		#if Z_WRITE_TYPE == 2
-		ZWRITEENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if Z_ENABLE_APPLY == 1
-		
-		#if Z_TYPE == 1
-		ZENABLE = FALSE;
-		#endif
-		
-		#if Z_TYPE == 2
-		ZENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if CULLMODE_APPLY == 1
-		
-		#if CULLMODE_TYPE == 0
-		CULLMODE = NONE;
-		#endif
-		
-		#if CULLMODE_TYPE == 1
-		CULLMODE = CW;
-		#endif
-		
-		#if CULLMODE_TYPE == 2
-		CULLMODE = CCW;
-		#endif
-		
-		#endif
         VertexShader = compile vs_3_0 BufferShadow_VS(true, true, false);
         PixelShader  = compile ps_3_0 BufferShadow_PS(true, true, false);
     }
@@ -843,135 +341,6 @@ technique MainTecBS3  < string MMDPass = "object_ss"; bool UseTexture = true; bo
 // オブジェクト描画用テクニック（PMDモデル用）
 technique MainTecBS4  < string MMDPass = "object_ss"; bool UseTexture = false; bool UseSphereMap = false; bool UseToon = true; > {
     pass DrawObject {
-		#if BLEND_APPLY == 1
-		
-		#if SRC_BLEND_TYPE == 0
-		SRCBLEND = ZERO;
-		#endif
-		#if SRC_BLEND_TYPE == 1
-		SRCBLEND = ONE;
-		#endif
-		#if SRC_BLEND_TYPE == 2
-		SRCBLEND = SrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 3
-		SRCBLEND = INVSrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 4
-		SRCBLEND = SrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 5
-		SRCBLEND = INVSrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 6
-		SRCBLEND = DestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 7
-		SRCBLEND = INVDestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 8
-		SRCBLEND = DestColor;
-		#endif
-		#if SRC_BLEND_TYPE == 9
-		SRCBLEND = INVDestColor;
-		#endif
-
-		#if DEST_BLEND_TYPE == 0
-		DESTBLEND = ZERO;
-		#endif
-		#if DEST_BLEND_TYPE == 1
-		DESTBLEND = ONE;
-		#endif
-		#if DEST_BLEND_TYPE == 2
-		DESTBLEND = SrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 3
-		DESTBLEND = INVSrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 4
-		DESTBLEND = SrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 5
-		DESTBLEND = INVSrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 6
-		DESTBLEND = DestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 7
-		DESTBLEND = INVDestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 8
-		DESTBLEND = DestColor;
-		#endif
-		#if DEST_BLEND_TYPE == 9
-		DESTBLEND = INVDestColor;
-		#endif
-		
-		#endif
-
-		#if ALPHA_BLEND_APPLY == 1
-		
-		#if ALPHA_BLEND_TYPE == 1
-		ALPHABLENDENABLE = FALSE;
-		#endif
-		
-		#if ALPHA_BLEND_TYPE == 2
-		ALPHABLENDENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if ALPHA_TEST_APPLY == 1
-		
-		#if ALPHA_TEST_TYPE == 1
-		ALPHATESTENABLE = FALSE;
-		#endif
-
-		#if ALPHA_TEST_TYPE == 2
-		ALPHATESTENABLE = TRUE;
-		#endif
-
-		#endif
-		
-		#if Z_WRITE_APPLY == 1
-		
-		#if Z_WRITE_TYPE == 1
-		ZWRITEENABLE = FALSE;
-		#endif
-		
-		#if Z_WRITE_TYPE == 2
-		ZWRITEENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if Z_ENABLE_APPLY == 1
-		
-		#if Z_TYPE == 1
-		ZENABLE = FALSE;
-		#endif
-		
-		#if Z_TYPE == 2
-		ZENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if CULLMODE_APPLY == 1
-		
-		#if CULLMODE_TYPE == 0
-		CULLMODE = NONE;
-		#endif
-		
-		#if CULLMODE_TYPE == 1
-		CULLMODE = CW;
-		#endif
-		
-		#if CULLMODE_TYPE == 2
-		CULLMODE = CCW;
-		#endif
-		
-		#endif
         VertexShader = compile vs_3_0 BufferShadow_VS(false, false, true);
         PixelShader  = compile ps_3_0 BufferShadow_PS(false, false, true);
     }
@@ -1115,135 +484,6 @@ technique MainTecBS5  < string MMDPass = "object_ss"; bool UseTexture = true; bo
 
 technique MainTecBS6  < string MMDPass = "object_ss"; bool UseTexture = false; bool UseSphereMap = true; bool UseToon = true; > {
     pass DrawObject {
-		#if BLEND_APPLY == 1
-		
-		#if SRC_BLEND_TYPE == 0
-		SRCBLEND = ZERO;
-		#endif
-		#if SRC_BLEND_TYPE == 1
-		SRCBLEND = ONE;
-		#endif
-		#if SRC_BLEND_TYPE == 2
-		SRCBLEND = SrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 3
-		SRCBLEND = INVSrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 4
-		SRCBLEND = SrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 5
-		SRCBLEND = INVSrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 6
-		SRCBLEND = DestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 7
-		SRCBLEND = INVDestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 8
-		SRCBLEND = DestColor;
-		#endif
-		#if SRC_BLEND_TYPE == 9
-		SRCBLEND = INVDestColor;
-		#endif
-
-		#if DEST_BLEND_TYPE == 0
-		DESTBLEND = ZERO;
-		#endif
-		#if DEST_BLEND_TYPE == 1
-		DESTBLEND = ONE;
-		#endif
-		#if DEST_BLEND_TYPE == 2
-		DESTBLEND = SrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 3
-		DESTBLEND = INVSrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 4
-		DESTBLEND = SrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 5
-		DESTBLEND = INVSrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 6
-		DESTBLEND = DestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 7
-		DESTBLEND = INVDestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 8
-		DESTBLEND = DestColor;
-		#endif
-		#if DEST_BLEND_TYPE == 9
-		DESTBLEND = INVDestColor;
-		#endif
-		
-		#endif
-
-		#if ALPHA_BLEND_APPLY == 1
-		
-		#if ALPHA_BLEND_TYPE == 1
-		ALPHABLENDENABLE = FALSE;
-		#endif
-		
-		#if ALPHA_BLEND_TYPE == 2
-		ALPHABLENDENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if ALPHA_TEST_APPLY == 1
-		
-		#if ALPHA_TEST_TYPE == 1
-		ALPHATESTENABLE = FALSE;
-		#endif
-
-		#if ALPHA_TEST_TYPE == 2
-		ALPHATESTENABLE = TRUE;
-		#endif
-
-		#endif
-		
-		#if Z_WRITE_APPLY == 1
-		
-		#if Z_WRITE_TYPE == 1
-		ZWRITEENABLE = FALSE;
-		#endif
-		
-		#if Z_WRITE_TYPE == 2
-		ZWRITEENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if Z_ENABLE_APPLY == 1
-		
-		#if Z_TYPE == 1
-		ZENABLE = FALSE;
-		#endif
-		
-		#if Z_TYPE == 2
-		ZENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if CULLMODE_APPLY == 1
-		
-		#if CULLMODE_TYPE == 0
-		CULLMODE = NONE;
-		#endif
-		
-		#if CULLMODE_TYPE == 1
-		CULLMODE = CW;
-		#endif
-		
-		#if CULLMODE_TYPE == 2
-		CULLMODE = CCW;
-		#endif
-		
-		#endif
         VertexShader = compile vs_3_0 BufferShadow_VS(false, true, true);
         PixelShader  = compile ps_3_0 BufferShadow_PS(false, true, true);
     }
@@ -1251,135 +491,6 @@ technique MainTecBS6  < string MMDPass = "object_ss"; bool UseTexture = false; b
 
 technique MainTecBS7  < string MMDPass = "object_ss"; bool UseTexture = true; bool UseSphereMap = true; bool UseToon = true; > {
     pass DrawObject {
-		#if BLEND_APPLY == 1
-		
-		#if SRC_BLEND_TYPE == 0
-		SRCBLEND = ZERO;
-		#endif
-		#if SRC_BLEND_TYPE == 1
-		SRCBLEND = ONE;
-		#endif
-		#if SRC_BLEND_TYPE == 2
-		SRCBLEND = SrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 3
-		SRCBLEND = INVSrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 4
-		SRCBLEND = SrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 5
-		SRCBLEND = INVSrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 6
-		SRCBLEND = DestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 7
-		SRCBLEND = INVDestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 8
-		SRCBLEND = DestColor;
-		#endif
-		#if SRC_BLEND_TYPE == 9
-		SRCBLEND = INVDestColor;
-		#endif
-
-		#if DEST_BLEND_TYPE == 0
-		DESTBLEND = ZERO;
-		#endif
-		#if DEST_BLEND_TYPE == 1
-		DESTBLEND = ONE;
-		#endif
-		#if DEST_BLEND_TYPE == 2
-		DESTBLEND = SrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 3
-		DESTBLEND = INVSrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 4
-		DESTBLEND = SrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 5
-		DESTBLEND = INVSrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 6
-		DESTBLEND = DestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 7
-		DESTBLEND = INVDestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 8
-		DESTBLEND = DestColor;
-		#endif
-		#if DEST_BLEND_TYPE == 9
-		DESTBLEND = INVDestColor;
-		#endif
-		
-		#endif
-
-		#if ALPHA_BLEND_APPLY == 1
-		
-		#if ALPHA_BLEND_TYPE == 1
-		ALPHABLENDENABLE = FALSE;
-		#endif
-		
-		#if ALPHA_BLEND_TYPE == 2
-		ALPHABLENDENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if ALPHA_TEST_APPLY == 1
-		
-		#if ALPHA_TEST_TYPE == 1
-		ALPHATESTENABLE = FALSE;
-		#endif
-
-		#if ALPHA_TEST_TYPE == 2
-		ALPHATESTENABLE = TRUE;
-		#endif
-
-		#endif
-		
-		#if Z_WRITE_APPLY == 1
-		
-		#if Z_WRITE_TYPE == 1
-		ZWRITEENABLE = FALSE;
-		#endif
-		
-		#if Z_WRITE_TYPE == 2
-		ZWRITEENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if Z_ENABLE_APPLY == 1
-		
-		#if Z_TYPE == 1
-		ZENABLE = FALSE;
-		#endif
-		
-		#if Z_TYPE == 2
-		ZENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if CULLMODE_APPLY == 1
-		
-		#if CULLMODE_TYPE == 0
-		CULLMODE = NONE;
-		#endif
-		
-		#if CULLMODE_TYPE == 1
-		CULLMODE = CW;
-		#endif
-		
-		#if CULLMODE_TYPE == 2
-		CULLMODE = CCW;
-		#endif
-		
-		#endif
         VertexShader = compile vs_3_0 BufferShadow_VS(true, true, true);
         PixelShader  = compile ps_3_0 BufferShadow_PS(true, true, true);
     }
