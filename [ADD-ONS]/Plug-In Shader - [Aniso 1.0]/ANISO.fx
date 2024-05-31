@@ -1,11 +1,19 @@
 //==============================//
 //
-// - Plug-In Shader Aniso Filter - By Infu_D, Joshua: 1.8
+// - Plug-In Shader Aniso Filter - By Infu_D, Joshua
 //
+//==============================//
+
+float2 ViewportSize : VIEWPORTPIXELSIZE;
+static const float2 ViewportOffset = float2(0.5,0.5)/ViewportSize;
+
+float4x4 WorldMatrix         : WORLD;
+
 //==============================//
 	
 	// Aniso:
-	float Size = 8.0f; // Blur Size (Radius)
+	static float Blur_Size = 16.0f; // Blur Size (Radius)
+	static float Size = Blur_Size + (WorldMatrix);
 	float Intensity = 1.2;  // Aniso Intensity
 	//  More settings in "ps_aniso".
 	
@@ -109,8 +117,6 @@ sampler2D DS = sampler_state {
 float4 ClearColor = {0,0,0,0};
 float ClearDepth  = 1.0;
 
-float2 ViewportSize : VIEWPORTPIXELSIZE;
-static const float2 ViewportOffset = float2(0.5,0.5)/ViewportSize;
 #define cmp
 
 //============================================================================//
@@ -180,7 +186,7 @@ float4 ps_model(vs_out i) : COLOR0
     
     // Output to screen
     Color /= Quality * Directions;
-	  return pow(0.45, saturate(1 - Color)/2.2) * Intensity;
+	  return pow(Color, 1) * Intensity;
 }
 
 float4 ps_expand(vs_out i) : COLOR0
