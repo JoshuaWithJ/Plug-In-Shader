@@ -36,6 +36,11 @@ float SoftShadowParam = 0.5;
 // Shadow Size
 #define SHADOWMAP_SIZE 1024
 
+// Shadow Affecting Specular Reflection
+#define SHADOW_AFFECT_SPECULAR_REFLECTIONS 0
+
+float Reflection_Shadow_Effect_Intensity = 1.0;
+
 //////////////////////////////////////////////////////////////////////////////////////
 //Texture
 float Texture_Brightness = 1.0;
