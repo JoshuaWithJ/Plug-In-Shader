@@ -68,6 +68,16 @@
 	-	This way you are also able to edit the colors of the shadow without the need
 		of a toon.
 //////////////////////////////////////////////////////////////////////////////////////
+
+- Shadow Affecting Specular Reflection:
+
+	This option make the reflections be affacted by the shadow and don't render where
+	the shadow is. (Helps on realistic models)
+	
+	Reflection Shadow Effect Intensity: This option allow you change the intensity of
+	the effect.
+
+//////////////////////////////////////////////////////////////////////////////////////
 - Texture Brigthness:
 
 	As the name says it allow you change the value of brightness in the model. Apply
@@ -130,6 +140,17 @@
 	Alpha_Color = float3(1.0, 1.0, 1.0);
 	
 	"Alpha_Color_Intensity" Allows you to change the intensity of the effect.
+	
+	APPLY_ALPHA_MASK_RGB_CHANNELS: This option allows you to use a R,G,B channel
+	as an Alpha Mask. (Some Game engines/Maps do that)
+
+	R_CHANNEL_ALPHA_MASK:	Enable The Red Channel of the map as the Alpha
+									mask source.
+	G_CHANNEL_ALPHA_MASK:	Enable The Green Channel of the map as the Alpha
+									mask source.
+	B_CHANNEL_ALPHA_MASK:	Enable The Blue Channel of the map as the Alpha
+									mask source.
+	
 //////////////////////////////////////////////////////////////////////////////////////
 - Transparency Mask
 
@@ -357,6 +378,17 @@
 	AMBIENTOCCLUSSION TYPE 2: This type affect the color of the model by making it
 							  brigther where the ambient occlusion is.
 							  (recommended for light maps)
+							  
+	APPLY_AMBIENTOCCLUSSION_RGB_CHANNELS: This option allows you to use a R,G,B channel
+	as an AO Map. (Some Game engines/Maps do that)
+
+	R_CHANNEL_AMBIENTOCCLUSSION:	Enable The Red Channel of the map as the ambient
+									occlusion source.
+	G_CHANNEL_AMBIENTOCCLUSSION:	Enable The Green Channel of the map as the ambient
+									occlusion source.
+	B_CHANNEL_AMBIENTOCCLUSSION:	Enable The Blue Channel of the map as the ambient
+									occlusion source.
+							  
 //////////////////////////////////////////////////////////////////////////////////////
 - IBL
 
