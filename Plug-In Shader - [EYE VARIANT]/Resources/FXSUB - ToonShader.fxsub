@@ -1524,7 +1524,12 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	float2 UVA = UV1;
 	#endif
 	
+	#if APPLY_ALPHA_MASK_RGB_CHANNELS == 0
 	float AlphaMask = tex2D(Alpha_Mask_Sampler, UVA);
+	#endif
+	#if APPLY_ALPHA_MASK_RGB_CHANNELS == 1
+	float3 AlphaMask = tex2D(Alpha_Mask_Sampler, UVA);
+	#endif
 	#endif
 
 //////////////////////////////////////////////////
@@ -1714,7 +1719,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 		float U = SoftShadowParam / SHADOWMAP_SIZE;
 		float V = SoftShadowParam / SHADOWMAP_SIZE;
         if(parthf) {
-            // ƒZƒ‹ƒtƒVƒƒƒhƒE mode2
+            // ã‚»ãƒ«ãƒ•ã‚·ãƒ£ãƒ‰ã‚¦ mode2
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(0,0)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(U,0)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(-U,0)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
@@ -1725,7 +1730,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(-U,-V)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(U,-V)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
         } else {
-            // ƒZƒ‹ƒtƒVƒƒƒhƒE mode1
+            // ã‚»ãƒ«ãƒ•ã‚·ãƒ£ãƒ‰ã‚¦ mode1
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(0,0)).r , 0.0f)*SKII1-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(U,0)).r , 0.0f)*SKII1-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(-U,0)).r , 0.0f)*SKII1-0.3f);
@@ -1912,7 +1917,7 @@ technique MainTecBS3  < string MMDPass = "object_ss"; bool UseTexture = true; bo
     }
 }
 
-// ƒIƒuƒWƒFƒNƒg•`‰æ—pƒeƒNƒjƒbƒNiPMDƒ‚ƒfƒ‹—pj
+// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆæç”»ç”¨ãƒ†ã‚¯ãƒ‹ãƒƒã‚¯ï¼ˆPMDãƒ¢ãƒ‡ãƒ«ç”¨ï¼‰
 technique MainTecBS4  < string MMDPass = "object_ss"; bool UseTexture = false; bool UseSphereMap = false; bool UseToon = true; > {
     pass DrawObject {
 		#if BLEND_APPLY == 1
