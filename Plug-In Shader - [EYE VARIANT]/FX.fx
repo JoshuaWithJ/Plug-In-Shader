@@ -14,6 +14,13 @@ float Saturation = 1.0;
 float Gama = 1.0;
 
 //////////////////////////////////////////////////////////////////////////////////////
+// Light Ambient
+
+#define APPLY_LIGHT_AMBIENT 1
+#define APPLY_MATERIAL_AMBIENT 1
+#define APPLY_MATERIAL_EMMISIVE 1
+
+//////////////////////////////////////////////////////////////////////////////////////
 // Shader Style
 //TYPE 0 = Normal
 //TYPE 1 = Toon Shader
@@ -201,6 +208,20 @@ float Custom_RimLight_Size = 1.0;
 float3 Custom_RimLight_Color = float3(1,1,1);
 
 //////////////////////////////////////////////////////////////////////////////////////
+// Rim Shadow
+
+#define APPLY_RIMSHADOW 0
+#define APPLY_RIMSHADOW_LIGHT_DIRECTION 1
+
+float RimShadow_Size = 10.0;
+
+float RimShadow_Intensity = 1.0;
+
+float RimShadow_Smooth = 1.5;
+
+float3 RimShadow_Color = float3(1.0,1.0,1.0);
+
+//////////////////////////////////////////////////////////////////////////////////////
 // SubSurfaceToon
 
 #define APPLY_SUBSURFACETOON  0
@@ -264,6 +285,8 @@ float VertexColor_Intensity = 1.0;
 
 float Ambient_Occlussion_Intensity = 1.0;
 
+float3 Ambient_Occlussion_Color = float3(0,0,0);
+
 //////////////////////////////////////////////////////////////////////////////////////
 // IBL
 
@@ -288,13 +311,20 @@ float IBL_Brightness = 1.0;
 //////////////////////////////////////////////////////////////////////////////////////
 // Eye Mask
 
-#define APPLY_EYEMASK 0
+#define APPLY_EYEMASK 1
 #define EyeMask_Texture "E.png";
 
 // TYPE 0 = Multiply
 // TYPE 1 = Add
 
 #define EYEMASK_TYPE 1
+
+//////////////////////////////////////////////////////////////////////////////////////
+// Billboard
+
+#define APPLY_BILLBOARD 0
+#define Billboard_Model_Name "(self)"
+#define Billboard_Bone_Name "BILLBOARD" 
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Blend Type

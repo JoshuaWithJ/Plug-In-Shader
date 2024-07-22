@@ -39,7 +39,19 @@
 	in MMD you can load the ToneMap controller in your project and it'll allow
 	you edit the scene freely.
 //////////////////////////////////////////////////////////////////////////////////////
+- Light Ambient
 
+	-	"APPLY_LIGHT_AMBIENT" at 1 it will enable the light ambient (a.k.a the light
+		direction colors. At 0 it'll disable, use it as you wish.
+	
+	-	"APPLY_MATERIAL_AMBIENT" at it will enable the material ambient from the model
+		material configuration (PMXE). at 0 it will be disabled. 
+	
+	-	"APPLY_MATERIAL_EMMISIVE" at it will enable the material emmisive (a.k.a the
+		diffuse color) from the model material configuration (PMXE).
+		at 0 it will be disabled. 
+
+//////////////////////////////////////////////////////////////////////////////////////
 - Shader Style:
 
 	You can choose whether have a more "realistic" shader style or a Cartoon / Toon
@@ -388,7 +400,15 @@
 									occlusion source.
 	B_CHANNEL_AMBIENTOCCLUSSION:	Enable The Blue Channel of the map as the ambient
 									occlusion source.
-							  
+									
+	Ambient_Occlussion_Intensity:	This option let's you change how intense you want the
+									ambient occlusion to be.
+
+	Ambient_Occlussion_Color:	This option changes the color of the Ambient Occlusion.
+								It works this way:
+								Color Channels:				   Red/Green/Blue
+								Custom_RimLight_Color = float3(1.0, 1.0, 1.0);
+	
 //////////////////////////////////////////////////////////////////////////////////////
 - IBL
 
@@ -407,6 +427,45 @@
 						  the shadow.
 						  
 	IBL Brightness: This option let you change the brightness of the IBL/s.
+//////////////////////////////////////////////////////////////////////////////////////
+- Billboard
+	
+	This feature allows you to add a simple but useful billboard effect to a mesh/model.
+	It makes the model always rotate into the camera. Is useful for 2D assets, like flares,
+	plane trees, 2D assets or any model that you may want to automatically face the camera.
+	
+	For a proper billboard effect you'll need to set it up in PMX Editor.
+	Please read this part as it is important.
+	First we need a bone to move the billboard model of it's place and specify the model
+	name so it is recognized by the effect:
+	
+	Billboard_Model_Name: Is the name of the model where the billboard bone is in.
+	if you are using the effect in the same model you have the bone. leave it as is:
+	
+	´´ Billboard_Model_Name "(self)" ´´
+	
+	"(self)" means the bone (a.k.a the controller) is in the model you applied the effect on.
+	If another model has the bone on it or you want to share it between 2 effects/models,
+	you'll have to specify the name + the file type between the quotations. for example:
+	
+	´´ Billboard_Model_Name "your_model_name.pmx" ´´
+	
+	and that's it.
+	
+	Billboard_Bone_Name: Is the name of the bone that the billboard will move on.
+	You can add a bone named "BILLBOARD" to your model in PMX Editor and it'll work
+	automatically. If you want another bone name to move the billboard, you'll need
+	to change the name that the option has between the quotations but this time without
+	any file type. Example
+	
+		#define Billboard_Bone_Name "BILLBOARD"
+		
+		to:
+		
+		#define Billboard_Bone_Name "other_bone_name"
+		
+	Have in mind, the bone and the effect bone need to have the exact name. And that's it.
+
 //////////////////////////////////////////////////////////////////////////////////////
 - Blend Type
 
@@ -430,8 +489,8 @@
 	This option mask allows you use a texture on top to detail the eye, for example:
 	Eyes Highlight.
 //////////////////////////////////////////////////////////////////////////////////////
-- Specuñar Pos
+- Specular Pos
 
-	Specular Pos X/Y: Inspired on DIVA, This option allows you move the secondary
-	specular from it's place to add more detail to the eye.
+	Specular Pos X/Y:	Inspired on DIVA, This option allows you move the secondary
+						specular from it's place to add more detail to the eye.
 //////////////////////////////////////////////////////////////////////////////////////
