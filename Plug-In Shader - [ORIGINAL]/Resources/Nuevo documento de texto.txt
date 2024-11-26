@@ -1,2 +1,0 @@
-Custom = dot( normal, eye) * cam_direction.y;
-Thigh = lerp( mallasampler, skin shader/color, Custom);
