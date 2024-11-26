@@ -4,7 +4,6 @@
 # CONTACT AND SUPPORT:
 - [Carrd](https://joshuawithj.carrd.co)
 - [Ko-Fi](https://ko-fi.com/joshuawithj)
-- [Discord Server](https://discord.gg/8SH2bVCqS8)
 
 # NOTES: 💙
 - **TONEMAP IS EXTREMLY RECOMMENDED TO USE!**
@@ -32,13 +31,19 @@
 - Anisotropic / Specular Lighting.
 - Environment Maps.
 - Refraction.
-- Different Type of RimLights.
+- Rim Lighting.
+- Rim Shadow.
 - HeightMap / Parallax.
-- Subsurfacetoon.
+- Subsurface scattering.
 - Image Based Lighting / IBL.
 - Vertex Color.
 - Ambient Occlussion.
+- Billboard.
 - Blending Modes.
+- Aniso Post Processing.
+- Subsurface scattering Post Processing.
+- IBL Post Processing.
+- Alpha Post Processing.
 
 # RULES: 💙
 - You are free to use it in any kind or type of models.
@@ -59,9 +64,11 @@
 - Normal Map by LessThanEqual
 - SpecularMap by Joshua
 - RimLight by Joshua
+- RimShadow by Joshua
+- Vertex Color by Joshua
 - Fresnel by Joshua
-- Alpha Channel Options by KH40 / Joshua
-- HgShadow by 針金P
+- Alpha Channel Options by Joshua
+- Ambient Occlussion by Joshua
 - Blend Options Support by Joshua
 - Anisotropic by Farfarer / Infu_D / Joshua
 - HeightMap by FlyingSpirits / Rui
@@ -70,6 +77,8 @@
 - Transparency Mask by Joshua
 - Alpha Mask by Joshua
 - Eye Mask by Joshua
+- Hair Layer by Joshua / pmot
+- HgShadow by 針金P
 
 # SPECIALS THANKS: 💙
 - [Infu_D](https://github.com/Infused-Doggo): For features supports, guides, advice and general assistance.
