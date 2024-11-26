@@ -4,6 +4,29 @@
 //   EXTENDED TEXT FORM TUTORIAL
 //
 //////////////////////////////////////////////////////////////////////////////////////
+Mixing of shaders by Joshua
+General Guide / Help: Ben Cloward
+Base shader by BeanManP
+ToneMap by Skyth / Joshua
+Normal Map by LessThanEqual
+SpecularMap by Joshua
+RimLight by Joshua
+RimShadow by Joshua
+Vertex Color by Joshua
+Fresnel by Joshua
+Alpha Channel Options by Joshua
+Ambient Occlussion by Joshua
+HgShadow by 針金P
+Blend Options Support by Joshua
+Anisotropic by Farfarer / Infu_D / Joshua
+HeightMap by FlyingSpirits / Rui
+IBL by Infu_D / Joshua
+SubSurfaceToon by Infu_D / Joshua
+Transparency Mask by Joshua
+Alpha Mask by Joshua
+Eye Mask by Joshua
+Hair Layer by Joshua / pmot
+//////////////////////////////////////////////////////////////////////////////////////
 - GENERAL -
 
 	- YOU HAVE TWO TYPES OF EDITABLE VALUES:
@@ -143,6 +166,24 @@
 	
 
 //////////////////////////////////////////////////////////////////////////////////////
+- Alpha Post Processing (Render Target)
+
+	This option allows you to change the alpha processing into a render target, which
+	allows you to have better result on materials who uses alpha for example:
+	Hairs, Plastic Materials, Fur, Glass Materials, etc.
+
+	To load the Alpha Render Target, Load the AlphaRT.x that's on the "ADD-ONS" folder.
+
+	NOTE: YOU HAVE TO ACTIVATE THE "Alpha Post Processing" OPTION FIRST, The Render
+	target will activate automatically once you load the .x accessory.
+
+	RENDER TARGET SETUP: Go to the "ALPHA_RT" tab in MME, once there, go into the model
+						 parts you want to apply this effect on, Once selected, click on
+						 "Set Effect" and select the "Alpha - On.fx". After that the effect
+						 will be applied. This is done so the Render Target knows what parts
+						 of the model are the ones to change.
+	
+//////////////////////////////////////////////////////////////////////////////////////
 - Alpha Color Channel
 
 	This option allows you to use a color as the alpha channel. Basic words, erase it
@@ -166,11 +207,11 @@
 //////////////////////////////////////////////////////////////////////////////////////
 - Transparency Mask
 
-	Immitating DIVA's thight mesh effect it allows you have an effect of a thigh mesh
+	Immitating DIVA's thighs mesh effect it allows you have an effect of a thigh mesh
 	in your model using the TRANSPARENCY MASK that diva model give you.
 	
-	TRANSPARENCY_COLOR_TYPE 0: The FX will use a pre-made skin color in the effect.
-	TRANSPARENCY_COLOR_TYPE 1: The FX will let you make your own skin color in the
+	TRANSPARENCY COLOR TYPE 0: The FX will use a pre-made skin color in the effect.
+	TRANSPARENCY COLOR TYPE 1: The FX will let you make your own skin color in the
 								"Transparency_Color" color option. It work this way:
 								
 									Color Channels:             Red/Green/Blue
@@ -183,13 +224,15 @@
 	It allows you use a BLACK AND WHITE texture to indicate where the texture will be
 	transparent. BLACK = Transparent / WHITE = Intact.
 	
-		APPLY_ALPHA_MASK_UV 0 = UV : Original Model UV.
-		APPLY_ALPHA_MASK_UV 1 = UV1: Second UV (Mainly used for AO Maps).
+		APPLY ALPHA MASK UV 0 = UV : Original Model UV.
+		APPLY ALPHA MASK UV 1 = UV1: Second UV (Mainly used for AO Maps).
+		
 //////////////////////////////////////////////////////////////////////////////////////
 - Over Transparency
 
 	This option allows you to make Environment Maps, Specular, RimLight/Fresnel, Etc.
 	Not to fade with the alpha. It helps a lot on plastic and glass materials.
+	
 //////////////////////////////////////////////////////////////////////////////////////
 - Specular
 
@@ -234,6 +277,14 @@
 				
 	Aniso Softness: It allows you to change the sharpness of the Aniso. You are free
 					To edit it.
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+- Aniso Filter (Render Target)
+
+	NOTE:	YOU HAVE TO ACTIVATE THE ANISO OPTION FIRST, The Aniso Filter will activate
+	automatically once you load the .x accessory.
+
 //////////////////////////////////////////////////////////////////////////////////////
 - Environment Maps
 
@@ -285,6 +336,7 @@
 	HEIGHT: Height of the reflection texture.
 	APPLY REFRACTION ANTI ALIAS 1: This option applies Antialiasing to the
 								   reflection texture. (Makes it a tad heavier)
+
 //////////////////////////////////////////////////////////////////////////////////////
 - RimLight/Fresnel
 
@@ -314,6 +366,25 @@
 								It works this way:
 									Color Channels:				   Red/Green/Blue
 									Custom_RimLight_Color = float3(1.0, 1.0, 1.0);
+
+//////////////////////////////////////////////////////////////////////////////////////
+- Rim Shadow
+
+	This option adds a shadow that appears on the edge of your model, helps to add
+	more detail wherever is necessary. (Recommended in realistic Hairs or more depth
+										in needed materials)
+	
+	APPLY RIMSHADOW LIGHT DIRECTION:	This option allows you have directional
+										RimShadow.
+										
+	RimShadow Size:			This option changes the size of the RimShadow.
+	RimShadow Intensity:	This option changes the intensity of the RimShadow.
+	RimShadow Smooth:		This option changes the smoothness of the RimShadow.
+	RimShadow Color: 		This option changes the color of the RimShadow.
+							It works this way:
+									Color Channels:			 Red/Green/Blue
+									RimShadow_Color = float3(1.0, 1.0, 1.0);
+										
 //////////////////////////////////////////////////////////////////////////////////////
 - SubSurfaceToon
 
@@ -332,11 +403,14 @@
 						   Brigthness.
 						   
 	SubSurfaceToon Color: It allows you edit the basic SubSurfaceToon effect color.
+	
 //////////////////////////////////////////////////////////////////////////////////////
 - SubSurfaceToon Filter
 
-	NOTE: The SubSurfaceToon Filter activates automatically once you load the
-		  .x accessory
+	To load the SSS Render Target (Filter), Load the SSS.x that's on the "ADD-ONS" folder.
+	
+	NOTE:	YOU HAVE TO ACTIVATE THE SUBSURFACETOON OPTION FIRST, The SubSurfaceToon Filter
+			will activate automatically once you load the .x accessory.
 
 	APPLY SUBSURFACETOON FILTER SHADOW: This option let you choose use the
 										Uncolored shadow the SubSurfaceToon Filter
@@ -345,6 +419,7 @@
 										
 	SubSurfaceToon Saturation: This option allows you to change the saturation of the
 							   SubSurfaceToon Filter. You can change it as you wish.
+							   
 //////////////////////////////////////////////////////////////////////////////////////
 - Height Map
 
@@ -359,6 +434,7 @@
 
 	Height Intensity: This option allows you change the depth of the Height Map.
 					  (Is recommend to not go above "1.0" or "-1.0")
+					  
 //////////////////////////////////////////////////////////////////////////////////////
 - Edge Line
 
@@ -368,6 +444,7 @@
 					 It works this way:
 						Color Channels:      Red/Green/Blue/Alpha
 					Edge_Line_Color = float4(1.0, 1.0, 1.0, 1.0);
+					
 //////////////////////////////////////////////////////////////////////////////////////
 - Vertex Color
 
@@ -376,13 +453,14 @@
 	
 	Vertex Color Intensity: This option lets you change the intensity of the
 						    Vertex Color.
+							
 //////////////////////////////////////////////////////////////////////////////////////
 - Ambient Occlussion
 							   
 		APPLY_AMBIENTOCCLUSSION_UV 0 = UV1: Second UV (Mainly used for AO Maps).
 		APPLY_AMBIENTOCCLUSSION_UV 1 = UV : Original Model UV.
 
-	AMBIENTOCCLUSSION TYPE 0: This type don't affect the model color.
+	AMBIENTOCCLUSSION TYPE 0: This type don't affect the model. (Disabled)
 	
 	AMBIENTOCCLUSSION TYPE 1: This type affect the color of the model by making it
 							  darker where the ambient occlusion is. (Original Use)
@@ -427,6 +505,24 @@
 						  the shadow.
 						  
 	IBL Brightness: This option let you change the brightness of the IBL/s.
+	
+//////////////////////////////////////////////////////////////////////////////////////
+- IBLR Render Target
+	
+	This feature lets you use multiple IBLs at the same time. It has the same functions
+	as the original IBL and lets you rotate them as you like with the controller:
+	
+	"IBL RT - Controller.pmx"
+	
+	Use the bone "IBL_ROT" to rotate as you like and the many morphs to change the intensity
+	and the Brightness of the IBLs.
+	
+	Use the "Direction" morph to swap between "Directional IBL (Moves with the Light Direction)"
+	to "Static IBL" which does not move and stays in the same position (Benefitial for stages).
+	
+	"Shadow - Controller" works for HG shadow, which lets you controll the direction of the
+	shadow of said effect. Use the "Override" morph and move the "SHAD_POS" to your liking.
+	
 //////////////////////////////////////////////////////////////////////////////////////
 - Billboard
 	
@@ -488,9 +584,11 @@
 
 	This option mask allows you use a texture on top to detail the eye, for example:
 	Eyes Highlight.
+	
 //////////////////////////////////////////////////////////////////////////////////////
 - Specular Pos
 
 	Specular Pos X/Y:	Inspired on DIVA, This option allows you move the secondary
 						specular from it's place to add more detail to the eye.
+						
 //////////////////////////////////////////////////////////////////////////////////////

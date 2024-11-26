@@ -14,6 +14,37 @@ float Saturation = 1.0;
 float Gama = 1.0;
 
 //////////////////////////////////////////////////////////////////////////////////////
+// Hair Layer
+
+int Hair_Layer_Multiplication = 2;
+
+float Hair_Height = 0.04;
+
+float Alpha_Intensity        = 1.0;
+
+#define APPLY_DOUBLE_FACE 1
+
+//////////////////////////////////////////////////////////////////////////////////////
+//Alpha Mask Hair Overlay
+//Alpha Mask UV 0 = UV
+//Alpha Mask UV 1 = UV1
+
+#define APPLY_ALPHA_MASK_LAYER  1
+#define APPLY_ALPHA_MASK_LAYER_UV 0
+#define Alpha_Mask_L_Texture "Alpha.png";
+
+#define APPLY_ALPHA_MASK_LAYER_RGB_CHANNELS 0
+
+#define R_CHANNEL_ALPHA_MASK_LAYER 0
+#define G_CHANNEL_ALPHA_MASK_LAYER 0
+#define B_CHANNEL_ALPHA_MASK_LAYER 0
+
+float ALPHA_MASK_LAYER_Intensity	= 1.0;
+
+float ALPHA_MASK_LAYER_Scale_X	= 1.5;
+float ALPHA_MASK_LAYER_Scale_Y	= 1.5;
+
+//////////////////////////////////////////////////////////////////////////////////////
 // Light Ambient
 
 #define APPLY_LIGHT_AMBIENT 1
@@ -101,7 +132,7 @@ float Alpha_Clip        = 0.0; //Set a value from 0 to 1
 //////////////////////////////////////////////////////////////////////////////////////
 // Alpha Post Processing (Render Target)
 
-#define APPLY_ALPHA_POST_PROCESSING 0
+#define APPLY_ALPHA_POST_PROCESSING 1
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Alpha Color Channel

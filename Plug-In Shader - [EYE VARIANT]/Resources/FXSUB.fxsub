@@ -13,9 +13,13 @@
 texture ObjectTexture: MATERIALTEXTURE;
 sampler ObjTexSampler = sampler_state {
     texture = <ObjectTexture>;
-    FILTER= ANISOTROPIC;
-    AddressU  = WRAP;
-    AddressV  = WRAP;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
 };
 #endif
 
@@ -25,9 +29,13 @@ texture2D ObjectTexture : ANIMATEDTEXTURE <
 >;
 sampler ObjTexSampler = sampler_state {
     texture = <ObjectTexture>;
-    FILTER= ANISOTROPIC;
-    AddressU  = WRAP;
-    AddressV  = WRAP;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
 };
 #endif
 
@@ -36,9 +44,13 @@ sampler ObjTexSampler = sampler_state {
 texture ObjectSphereMap: MATERIALSPHEREMAP;
 sampler ObjSphareSampler = sampler_state {
     texture = <ObjectSphereMap>;
-    FILTER= ANISOTROPIC;
-    AddressU  = WRAP;
-    AddressV  = WRAP;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
 };
 #endif
 
@@ -54,9 +66,13 @@ texture2D NormalMap : ANIMATEDTEXTURE <
 >;
 sampler NormalMapSampler = sampler_state {
     texture = <NormalMap>;
-    FILTER= ANISOTROPIC;
-    AddressU  = WRAP;
-    AddressV  = WRAP;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
 };
 #endif
 
@@ -67,9 +83,13 @@ texture2D SpecularMap <
 >;
 sampler SpecularMapSampler = sampler_state {
     texture = <SpecularMap>;
-    FILTER= ANISOTROPIC;
-    AddressU  = WRAP;
-    AddressV  = WRAP;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
 };
 #endif
 
@@ -80,9 +100,13 @@ textureCUBE CubeMap <
 >;
 sampler CubeMapSampler = sampler_state {
     texture = <CubeMap>;
-    FILTER= ANISOTROPIC;
-    AddressU  = WRAP;
-    AddressV  = WRAP;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
 };
 #endif
 
@@ -93,9 +117,13 @@ sampler CubeMapSampler = sampler_state {
 < string ResourceName = HeightMap_Texture; >;
 	sampler HeightMap_Sampler = sampler_state {
     texture   = <HeightMap>;
-    FILTER= ANISOTROPIC;
-    AddressU  = WRAP;
-    AddressV  = WRAP;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
 };
 #endif
 
@@ -106,9 +134,13 @@ texture2D TransparencyMask <
     >;
 sampler Transparency_Sampler = sampler_state {
     texture   = <TransparencyMask>;
-    FILTER= ANISOTROPIC;
-    AddressU  = WRAP;
-    AddressV  = WRAP;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
 };
 #endif
 //Alpha Mask
@@ -118,9 +150,13 @@ texture2D AlphaMask <
     >;
 sampler Alpha_Mask_Sampler = sampler_state {
     texture   = <AlphaMask>;
-    FILTER= ANISOTROPIC;
-    AddressU  = WRAP;
-    AddressV  = WRAP;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
 };
 #endif
 
@@ -132,9 +168,13 @@ texture2D SubSurfaceToonMap <
     >;
 sampler SubSurfaceToon_Map_Sampler = sampler_state {
     texture   = <SubSurfaceToonMap>;
-    FILTER= ANISOTROPIC;
-    AddressU  = WRAP;
-    AddressV  = WRAP;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
 };
 #endif
 #endif
@@ -146,11 +186,13 @@ bool SSS_Valid  : CONTROLOBJECT < string name = SSS_Control; >;
 shared texture2D SSSTex : RENDERCOLORTARGET;
 sampler2D SSS_Samp = sampler_state {
     texture = <SSSTex>;
-    MinFilter = LINEAR;
-    MagFilter = LINEAR;
-    MipFilter = LINEAR;
-    AddressU  = WRAP;
-    AddressV  = WRAP;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
 };
 
 #define Aniso_Control  "ANISO.x"
@@ -160,11 +202,13 @@ bool Aniso_Valid  : CONTROLOBJECT < string name = Aniso_Control; >;
 shared texture2D AnisoTex : RENDERCOLORTARGET;
 sampler2D Aniso_Samp = sampler_state {
     texture = <AnisoTex>;
-    MinFilter = LINEAR;
-    MagFilter = LINEAR;
-    MipFilter = LINEAR;
-    AddressU  = WRAP;
-    AddressV  = WRAP;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
 };
 
 //Refraction Texture
@@ -175,9 +219,13 @@ textureCUBE Refraction <
     >;
 sampler Refraction_Sampler = sampler_state {
     texture = <Refraction>;
-    FILTER= ANISOTROPIC;
-    AddressU  = WRAP;
-    AddressV  = WRAP;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
 };
 #endif
 #endif
@@ -261,11 +309,57 @@ texture2D AOMAP <
     >;
 sampler AO_Sampler = sampler_state {
     texture   = <AOMAP>;
-    FILTER= ANISOTROPIC;
-    AddressU  = WRAP;
-    AddressV  = WRAP;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
 };
 #endif
+
+#define IBLRT_Control  "IBL.x"
+bool IBLRT_Valid  : CONTROLOBJECT < string name = IBLRT_Control; >;
+
+//IBL RT
+shared texture2D IBLRT : RENDERCOLORTARGET;
+sampler2D IBLRT_Samp = sampler_state {
+    texture = <IBLRT>;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
+};
+
+//Specular RT
+shared texture2D SpecularRT : RENDERCOLORTARGET;
+sampler2D SpecularRT_Samp = sampler_state {
+    texture = <SpecularRT>;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
+};
+
+//Irradiance RT
+shared texture2D IrradianceRT : RENDERCOLORTARGET;
+sampler2D IrradianceRT_Samp = sampler_state {
+    texture = <IrradianceRT>;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
+};
 
 #if APPLY_IBL == 1
 //IBL
@@ -281,8 +375,6 @@ sampler IBLSampler = sampler_state {
     ADDRESSV  = CLAMP;
     ADDRESSW  = CLAMP;
 };
-#endif
-
 #if APPLY_IBL_SPECULAR == 1
 //IBL 2
 textureCUBE IBLMap2  <
@@ -312,6 +404,7 @@ sampler IBLSampler3 = sampler_state {
     ADDRESSW  = CLAMP;
 };
 #endif
+#endif
 
 
 //Eye Mask
@@ -321,9 +414,32 @@ texture2D EyeMask <
     >;
 sampler EyeMask_Sampler = sampler_state {
     texture   = <EyeMask>;
-    FILTER= ANISOTROPIC;
-    AddressU  = WRAP;
-    AddressV  = WRAP;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
+};
+#endif
+
+#if APPLY_ALPHA_POST_PROCESSING == 1
+
+#define AlphaRT_Control  "AlphaRT.x"
+bool ART_Valid  : CONTROLOBJECT < string name = AlphaRT_Control; >;
+
+//Alpha Map
+shared texture2D AlphaMaskRT : RENDERCOLORTARGET;
+sampler2D ART_Samp = sampler_state {
+    texture = <AlphaMaskRT>;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
 };
 #endif
 
@@ -489,7 +605,7 @@ struct BufferShadow_OUTPUT {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Vertex Shader
-BufferShadow_OUTPUT BufferShadow_VS(BufferShadow_INPUT IN, uniform bool useTexture, uniform bool useSphereMap, uniform bool useToon)
+BufferShadow_OUTPUT BufferShadow_VS(BufferShadow_INPUT IN)
 {
 	BufferShadow_OUTPUT Out = (BufferShadow_OUTPUT)0;
     
@@ -512,9 +628,7 @@ BufferShadow_OUTPUT BufferShadow_VS(BufferShadow_INPUT IN, uniform bool useTextu
 	// Color
 	Out.Color.rgb = 1;
 	
-	if ( !useToon ) {
-        Out.Color.rgb += max(0,dot( IN.Normal, -LightDirection )) * DiffuseColor.rgb;
-	}
+	Out.Color.rgb += max(0,dot( IN.Normal, -LightDirection )) * DiffuseColor.rgb;
 	
 	Out.Color.a = DiffuseColor.a;
 	Out.Color = saturate( Out.Color );
@@ -728,7 +842,7 @@ float2 ParallaxOcclusionMap(sampler2D heightMap, float2 coord, float3 V, int num
 #endif
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Pixel Shader
-float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform bool useSphereMap, uniform bool useToon) : COLOR
+float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 {
 //////////////////////////////////////////////////
 // Inputs
@@ -1040,7 +1154,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	
 	#if APPLY_REFRACTION == 1
 	#if APPLY_REFRACTION_LIGHT_DIRECTION == 1
-	float3 Refract = refract(EyeL, -Normal, 1.0/Refraction_Index).xyz;
+	float3 Refract = refract(EyeL, -Normal * float3(1,1,-1), 1.0/Refraction_Index).xyz;
 	#endif
 	#endif
 	
@@ -1218,7 +1332,9 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	#if APPLY_RIMSHADOW_LIGHT_DIRECTION == 0
 	float3 RimS1DIR = Eye;
 	RimS1DIR.y += 1 + Eye;
-	RimS1DIR.y -= 2;
+	RimShadow_Direction += (1 - Eye);
+	RimS1DIR.y -= RimShadow_Direction + (Eye.x);
+	RimS1DIR.x -= RimShadow_Direction;
 	
 	float3 RimS1Eye = normalize(Eye + RimS1DIR);
 	
@@ -1226,20 +1342,22 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	
 	#if APPLY_RIMSHADOW_LIGHT_DIRECTION == 1
 	float3 RimS1DIR = Eye;
-	RimS1DIR.y += 1 + Eye;
-	RimS1DIR.y -= 2;
 	
-	RimS1DIR.x -= LightDirection.x;
-	RimS1DIR.y -= LightDirection.y;
+	RimS1DIR.y += 1 + Eye;
+	RimShadow_Direction += (1 - Eye);
+	RimS1DIR.y -= RimShadow_Direction + (Eye.x) + (LightDirection.y * float( 1 - RimShadow_Direction + 2));
+	RimS1DIR.x -= RimShadow_Direction + (LightDirection.x * float( 1 - RimShadow_Direction * 2));
 	
 	float3 RimS1Eye = normalize(Eye + RimS1DIR);
 	#endif
 	
-	float4 RimShadow = saturate(pow( 1 - dot(Normal, RimS1Eye), RimShadow_Size / 10 ) * float4(RimShadow_Color,1)) * RimShadow_Intensity;
+	float4 RimShadow = saturate(pow( 1 - dot(Normal, RimS1Eye), RimShadow_Size / 10 )) * RimShadow_Intensity;
 	
 	float RimShadowSmooth = smoothstep(0.0, RimShadow_Smooth, 1);
 	
 	RimShadow = RimShadowSmooth * RimShadow;
+	
+	RimShadow.rgb *= RimShadow_Color;
 	
 	RimShadow.rgb *= 1.5  * LightAmbient;
 	
@@ -1251,9 +1369,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 //////////////////////////////////////////////////
 //Texture
 
-    if ( useTexture ) {
 		Color.rgb *= TexColor.rgb * Texture_Brightness;
-    }
 
 //////////////////////////////////////////////////
 // Final Colors
@@ -1351,8 +1467,8 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 
 	#if APPLY_VERTEXCOLOR == 1
 	float4 UV2			= IN.UV2;
-	float4 VertexColor = IN.UV2 * VertexColor_Intensity;
-	Color.rgb *= VertexColor.rgb;
+	float4 VertexColor = IN.UV2;
+	Color.rgb = lerp(Color.rgb, Color.rgb * VertexColor.rgb,VertexColor_Intensity);
 	#endif
 	
 //////////////////////////////////////////////////
@@ -1367,30 +1483,32 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	float2 UVAO = UV1;
 	#endif
 	float4 AmbientOcclussion = tex2D(AO_Sampler, UVAO);
-	
+
+	#if APPLY_AMBIENTOCCLUSSION_RGB_CHANNELS == 0
 	AmbientOcclussion.rgb += Ambient_Occlussion_Color;
+	#endif
 	
 	#if AMBIENTOCCLUSSION_TYPE == 1
 	
 	#if APPLY_AMBIENTOCCLUSSION_RGB_CHANNELS == 0
-	Color.rgb = lerp(Color.rgb, Color.rgb * AmbientOcclussion.rgb,Ambient_Occlussion_Intensity);
+	Color = lerp(Color, Color * AmbientOcclussion * AmbientOcclussion,(1 - AmbientOcclussion) * Ambient_Occlussion_Intensity);
 	#endif
 	
 	#if APPLY_AMBIENTOCCLUSSION_RGB_CHANNELS == 1
 	#if R_CHANNEL_AMBIENTOCCLUSSION == 1
-	Color.rgb = lerp(Color.rgb, Color.rgb * AmbientOcclussion.r,Ambient_Occlussion_Intensity);
+	Color.rgb = lerp(Color.rgb, Color.rgb * float3(Ambient_Occlussion_Color),(1 - AmbientOcclussion).r * Ambient_Occlussion_Intensity);
 	#endif
 	#endif
 	
 	#if APPLY_AMBIENTOCCLUSSION_RGB_CHANNELS == 1
 	#if G_CHANNEL_AMBIENTOCCLUSSION == 1
-	Color.rgb = lerp(Color.rgb, Color.rgb * AmbientOcclussion.g,Ambient_Occlussion_Intensity);
+	Color.rgb = lerp(Color.rgb, Color.rgb * float3(Ambient_Occlussion_Color),(1 - AmbientOcclussion).g * Ambient_Occlussion_Intensity);
 	#endif
 	#endif
 	
 	#if APPLY_AMBIENTOCCLUSSION_RGB_CHANNELS == 1
 	#if B_CHANNEL_AMBIENTOCCLUSSION == 1
-	Color.rgb = lerp(Color.rgb, Color.rgb * AmbientOcclussion.b,Ambient_Occlussion_Intensity);
+	Color.rgb = lerp(Color.rgb, Color.rgb * float3(Ambient_Occlussion_Color),(1 - AmbientOcclussion).b * Ambient_Occlussion_Intensity);
 	#endif
 	#endif
 	
@@ -1399,25 +1517,24 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	#if AMBIENTOCCLUSSION_TYPE == 2
 	
 	#if APPLY_AMBIENTOCCLUSSION_RGB_CHANNELS == 0
-	Color += AmbientOcclussion;
-	Color.rgb = lerp(Color.rgb, Color.rgb + AmbientOcclussion.rgb,Ambient_Occlussion_Intensity);
+	Color = lerp(Color, Color + AmbientOcclussion,(1 - AmbientOcclussion) * Ambient_Occlussion_Intensity);
 	#endif
 	
 	#if APPLY_AMBIENTOCCLUSSION_RGB_CHANNELS == 1
 	#if R_CHANNEL_AMBIENTOCCLUSSION == 1
-	Color.rgb = lerp(Color.rgb, Color.rgb + AmbientOcclussion.r,Ambient_Occlussion_Intensity);
+	Color.rgb = lerp(Color.rgb, Color.rgb * float3(Ambient_Occlussion_Color),(1 - AmbientOcclussion).r * Ambient_Occlussion_Intensity);
 	#endif
 	#endif
 	
 	#if APPLY_AMBIENTOCCLUSSION_RGB_CHANNELS == 1
 	#if G_CHANNEL_AMBIENTOCCLUSSION == 1
-	Color.rgb = lerp(Color.rgb, Color.rgb + AmbientOcclussion.g,Ambient_Occlussion_Intensity);
+	Color.rgb = lerp(Color.rgb, Color.rgb * float3(Ambient_Occlussion_Color),(1 - AmbientOcclussion).g * Ambient_Occlussion_Intensity);
 	#endif
 	#endif
 	
 	#if APPLY_AMBIENTOCCLUSSION_RGB_CHANNELS == 1
 	#if B_CHANNEL_AMBIENTOCCLUSSION == 1
-	Color.rgb = lerp(Color.rgb, Color.rgb + AmbientOcclussion.g,Ambient_Occlussion_Intensity);
+	Color.rgb = lerp(Color.rgb, Color.rgb + float3(Ambient_Occlussion_Color),(1 - AmbientOcclussion).b * Ambient_Occlussion_Intensity);
 	#endif
 	#endif
 	
@@ -1520,8 +1637,6 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 //////////////////////////////////////////////////
 	
 	#if APPLY_ALPHA == 1
-	Color.a *= DiffuseColor.a;
-	ShadowColor.a *= DiffuseColor.a;
 	
 	#if APPLY_VERTEXCOLOR == 1
 	Color.a *= VertexColor.a;
@@ -1600,6 +1715,24 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 		#endif
 
 		#endif
+//////////////////////////////////////////////////
+	
+	#if APPLY_ALPHA_POST_PROCESSING == 1
+	if(ART_Valid){
+	clip(Color.a < 0.1 ? -1:1);
+	
+	float2 texCoord = float2( ( IN.PPos.x/IN.PPos.w + 1.0f ) * 0.5f, 1.0f - ( IN.PPos.y/IN.PPos.w + 1.0f ) * 0.5f ) + 2;
+	float4 AlphaMaskRT = tex2Dlod(ART_Samp, float4(texCoord.xy, 0, 1));
+
+	Color.a += AlphaMaskRT * AlphaMaskRT.a;
+	}
+	#endif
+	
+	#if APPLY_ALPHA == 1
+	Color.a *= DiffuseColor.a;
+	ShadowColor.a *= DiffuseColor.a;
+	#endif
+	
 //////////////////////////////////////////////////
 
 		#if APPLY_ALPHA_MASK == 1
@@ -1683,18 +1816,75 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	if(HgShadow_Valid)
 	{
         float comp = HgShadow_GetSelfShadowRate(IN.PPos);
-        if ( useToon ) 
-		{
          comp = min(saturate(LightNormal * Toon), comp);
 	     ShadowComp = comp;
-		}
 	}
 
 //////////////////////////////////////////////////
 // IBL
+	if(IBLRT_Valid)
+	{
+	
+ 	#if APPLY_SUBSURFACETOON == 0
+	float2 texCoord = float2( ( IN.PPos.x/IN.PPos.w + 1.0f ) * 0.5f, 1.0f - ( IN.PPos.y/IN.PPos.w + 1.0f ) * 0.5f ) + 2;
+	
+	float4 IBL = tex2Dlod(IBLRT_Samp, float4(texCoord.xy, 0, 1)) * 0.5 * IBL_Brightness;
+		if(SSS_Valid)
+	{
+	float4 IBL1 = tex2Dlod(IBLRT_Samp, float4(texCoord.xy, 0, 1)) * 0.5;
+	float3 IBL_B		= pow( max(0,dot( (LightDirection * float3 (1.0,-1.0,1.0)), Normal )), 1 );
+	IBL1.rgb *= IBL_B.rgb;
+	ShadowColor.rgb = lerp(ShadowColor.rgb, ShadowColor.rgb + IBL1,IBL_Intensity);
+	} else {
+	float4 IBL1 = tex2Dlod(IBLRT_Samp, float4(texCoord.xy, 0, 1)) * 1.25;
+	float3 IBL_B		= pow( max(0,dot( (LightDirection * float3 (1.0,-1.0,1.0)), Normal )), 1 );
+	IBL1.rgb *= IBL_B.rgb;
+	ShadowColor.rgb = lerp(ShadowColor.rgb, ShadowColor.rgb + IBL1,IBL_Intensity);
+	}
 
+	#if APPLY_IBL_SPECULAR == 1
+	
+	float4 IBL2 = tex2Dlod(SpecularRT_Samp, float4(texCoord.xy, 0, 1)) * IBL_Brightness;
+	float4 IBL3 = tex2Dlod(IrradianceRT_Samp, float4(texCoord.xy, 0, 1)) * IBL_Brightness;
+	
+    IBL2.rgb = IBL2.rgb + -IBL3.rgb;
+    float4 IBL4 = lerp((IBL2 + IBL3) , 0, IBL_Brightness / 100);
+	#endif
+	
+	#if APPLY_IBL_LIGHT_AMBIENT == 1
+	
+	IBL.rgb *= LightAmbient.rgb + 0.5;
+	
+	#if APPLY_IBL_SPECULAR == 1
+	IBL4.rgb *= LightAmbient.rgb + 0.5;
+	#endif
+	#endif
+	
+	Color.rgb = lerp(Color.rgb, Color.rgb * IBL.rgb, 0.25 * IBL_Intensity);
+	
+	#if APPLY_IBL_SPECULAR == 1
+	#if APPLY_ANISO == 0
+	#if APPLY_SPECULAR == 1
+	Specular.rgb = lerp(Specular.rgb, Specular.rgb * IBL4.rgb,IBL_Intensity);
+	#endif
+	#endif
+	#endif
+	
+	#if APPLY_IBL_SPECULAR == 1
+	#if APPLY_ANISO == 1
+	Aniso.rgb = lerp(Aniso.rgb, Aniso.rgb * IBL4.rgb,IBL_Intensity);
+	#endif
+	#endif
+	
+	#endif
+	
+	
+	} else {
+	//////////////////////////////////////////////////
+	// OG IBL
 	if(SSS_Valid)
 	{
+	#if APPLY_IBL == 1
 	#if APPLY_IBL_SPECULAR == 1
 	float2 texCoord2 = float2( ( IN.PPos.x/IN.PPos.w + 1.0f ) * 0.5f, 1.0f - ( IN.PPos.y/IN.PPos.w + 1.0f ) * 0.5f ) + 2;
     float4 IBL2 = tex2Dlod(SSS_Samp, float4(texCoord2, 0, 1));
@@ -1727,6 +1917,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	#endif
 	#endif
 	
+	#endif
 	#endif
 	} else {
 	#if APPLY_IBL == 1
@@ -1804,7 +1995,8 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	
 	#endif
 	}
-
+	//////////////////////////////////////////////////
+	}
 //////////////////////////////////////////////////
 //SubSurfaceToon
 
@@ -1816,7 +2008,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 	
     float3 SubSurfaceToon1 = pow( max(0,dot( EyeL, Normal)), 2) * SubSurfaceToon_Color * float(0.3) * SubSurfaceToon_Bright;
 	
-	float3 SubSurfaceToon2 = saturate(pow( 1 - dot(Normal, EyeL), 1 ) * SubSurfaceToon_Color) * SubSurfaceToon_Bright * float(0.3);
+	float3 SubSurfaceToon2 = saturate(pow( 1 - dot(Normal * float3(1,1,-1), EyeL), 1 ) * SubSurfaceToon_Color) * SubSurfaceToon_Bright * float(0.3);
 
 	float3 SubSurfaceToonDisplay = saturate(pow(1.0 - dot( LightDirection, Eye ), 2));
 	float3 SubSurfaceToonDisplay1 = saturate(pow(1.0 - dot( -LightDirection, Eye ), 2));
@@ -1932,7 +2124,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN, uniform bool useTexture, uniform 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Techniques
-technique MainTecBS0  < string MMDPass = "object_ss"; bool UseTexture = false; bool UseSphereMap = false; bool UseToon = false; > {
+technique PGTech  < string MMDPass = "object_ss"; > {
     pass DrawObject {
 		#if BLEND_APPLY == 1
 		
@@ -2063,961 +2255,8 @@ technique MainTecBS0  < string MMDPass = "object_ss"; bool UseTexture = false; b
 		#endif
 		
 		#endif
-        VertexShader = compile vs_3_0 BufferShadow_VS(false, false, false);
-        PixelShader  = compile ps_3_0 BufferShadow_PS(false, false, false);
-    }
-}
-
-technique MainTecBS1  < string MMDPass = "object_ss"; bool UseTexture = true; bool UseSphereMap = false; bool UseToon = false; > {
-    pass DrawObject {
-		#if BLEND_APPLY == 1
-		
-		#if SRC_BLEND_TYPE == 0
-		SRCBLEND = ZERO;
-		#endif
-		#if SRC_BLEND_TYPE == 1
-		SRCBLEND = ONE;
-		#endif
-		#if SRC_BLEND_TYPE == 2
-		SRCBLEND = SrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 3
-		SRCBLEND = INVSrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 4
-		SRCBLEND = SrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 5
-		SRCBLEND = INVSrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 6
-		SRCBLEND = DestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 7
-		SRCBLEND = INVDestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 8
-		SRCBLEND = DestColor;
-		#endif
-		#if SRC_BLEND_TYPE == 9
-		SRCBLEND = INVDestColor;
-		#endif
-
-		#if DEST_BLEND_TYPE == 0
-		DESTBLEND = ZERO;
-		#endif
-		#if DEST_BLEND_TYPE == 1
-		DESTBLEND = ONE;
-		#endif
-		#if DEST_BLEND_TYPE == 2
-		DESTBLEND = SrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 3
-		DESTBLEND = INVSrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 4
-		DESTBLEND = SrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 5
-		DESTBLEND = INVSrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 6
-		DESTBLEND = DestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 7
-		DESTBLEND = INVDestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 8
-		DESTBLEND = DestColor;
-		#endif
-		#if DEST_BLEND_TYPE == 9
-		DESTBLEND = INVDestColor;
-		#endif
-		
-		#endif
-
-		#if ALPHA_BLEND_APPLY == 1
-		
-		#if ALPHA_BLEND_TYPE == 1
-		ALPHABLENDENABLE = FALSE;
-		#endif
-		
-		#if ALPHA_BLEND_TYPE == 2
-		ALPHABLENDENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if ALPHA_TEST_APPLY == 1
-		
-		#if ALPHA_TEST_TYPE == 1
-		ALPHATESTENABLE = FALSE;
-		#endif
-
-		#if ALPHA_TEST_TYPE == 2
-		ALPHATESTENABLE = TRUE;
-		#endif
-
-		#endif
-		
-		#if Z_WRITE_APPLY == 1
-		
-		#if Z_WRITE_TYPE == 1
-		ZWRITEENABLE = FALSE;
-		#endif
-		
-		#if Z_WRITE_TYPE == 2
-		ZWRITEENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if Z_ENABLE_APPLY == 1
-		
-		#if Z_TYPE == 1
-		ZENABLE = FALSE;
-		#endif
-		
-		#if Z_TYPE == 2
-		ZENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if CULLMODE_APPLY == 1
-		
-		#if CULLMODE_TYPE == 0
-		CULLMODE = NONE;
-		#endif
-		
-		#if CULLMODE_TYPE == 1
-		CULLMODE = CW;
-		#endif
-		
-		#if CULLMODE_TYPE == 2
-		CULLMODE = CCW;
-		#endif
-		
-		#endif
-        VertexShader = compile vs_3_0 BufferShadow_VS(true, false, false);
-        PixelShader  = compile ps_3_0 BufferShadow_PS(true, false, false);
-    }
-}
-
-technique MainTecBS2  < string MMDPass = "object_ss"; bool UseTexture = false; bool UseSphereMap = true; bool UseToon = false; > {
-    pass DrawObject {
-		#if BLEND_APPLY == 1
-		
-		#if SRC_BLEND_TYPE == 0
-		SRCBLEND = ZERO;
-		#endif
-		#if SRC_BLEND_TYPE == 1
-		SRCBLEND = ONE;
-		#endif
-		#if SRC_BLEND_TYPE == 2
-		SRCBLEND = SrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 3
-		SRCBLEND = INVSrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 4
-		SRCBLEND = SrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 5
-		SRCBLEND = INVSrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 6
-		SRCBLEND = DestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 7
-		SRCBLEND = INVDestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 8
-		SRCBLEND = DestColor;
-		#endif
-		#if SRC_BLEND_TYPE == 9
-		SRCBLEND = INVDestColor;
-		#endif
-
-		#if DEST_BLEND_TYPE == 0
-		DESTBLEND = ZERO;
-		#endif
-		#if DEST_BLEND_TYPE == 1
-		DESTBLEND = ONE;
-		#endif
-		#if DEST_BLEND_TYPE == 2
-		DESTBLEND = SrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 3
-		DESTBLEND = INVSrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 4
-		DESTBLEND = SrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 5
-		DESTBLEND = INVSrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 6
-		DESTBLEND = DestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 7
-		DESTBLEND = INVDestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 8
-		DESTBLEND = DestColor;
-		#endif
-		#if DEST_BLEND_TYPE == 9
-		DESTBLEND = INVDestColor;
-		#endif
-		
-		#endif
-
-		#if ALPHA_BLEND_APPLY == 1
-		
-		#if ALPHA_BLEND_TYPE == 1
-		ALPHABLENDENABLE = FALSE;
-		#endif
-		
-		#if ALPHA_BLEND_TYPE == 2
-		ALPHABLENDENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if ALPHA_TEST_APPLY == 1
-		
-		#if ALPHA_TEST_TYPE == 1
-		ALPHATESTENABLE = FALSE;
-		#endif
-
-		#if ALPHA_TEST_TYPE == 2
-		ALPHATESTENABLE = TRUE;
-		#endif
-
-		#endif
-		
-		#if Z_WRITE_APPLY == 1
-		
-		#if Z_WRITE_TYPE == 1
-		ZWRITEENABLE = FALSE;
-		#endif
-		
-		#if Z_WRITE_TYPE == 2
-		ZWRITEENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if Z_ENABLE_APPLY == 1
-		
-		#if Z_TYPE == 1
-		ZENABLE = FALSE;
-		#endif
-		
-		#if Z_TYPE == 2
-		ZENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if CULLMODE_APPLY == 1
-		
-		#if CULLMODE_TYPE == 0
-		CULLMODE = NONE;
-		#endif
-		
-		#if CULLMODE_TYPE == 1
-		CULLMODE = CW;
-		#endif
-		
-		#if CULLMODE_TYPE == 2
-		CULLMODE = CCW;
-		#endif
-		
-		#endif
-        VertexShader = compile vs_3_0 BufferShadow_VS(false, true, false);
-        PixelShader  = compile ps_3_0 BufferShadow_PS(false, true, false);
-    }
-}
-
-technique MainTecBS3  < string MMDPass = "object_ss"; bool UseTexture = true; bool UseSphereMap = true; bool UseToon = false; > {
-    pass DrawObject {
-		#if BLEND_APPLY == 1
-		
-		#if SRC_BLEND_TYPE == 0
-		SRCBLEND = ZERO;
-		#endif
-		#if SRC_BLEND_TYPE == 1
-		SRCBLEND = ONE;
-		#endif
-		#if SRC_BLEND_TYPE == 2
-		SRCBLEND = SrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 3
-		SRCBLEND = INVSrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 4
-		SRCBLEND = SrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 5
-		SRCBLEND = INVSrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 6
-		SRCBLEND = DestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 7
-		SRCBLEND = INVDestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 8
-		SRCBLEND = DestColor;
-		#endif
-		#if SRC_BLEND_TYPE == 9
-		SRCBLEND = INVDestColor;
-		#endif
-
-		#if DEST_BLEND_TYPE == 0
-		DESTBLEND = ZERO;
-		#endif
-		#if DEST_BLEND_TYPE == 1
-		DESTBLEND = ONE;
-		#endif
-		#if DEST_BLEND_TYPE == 2
-		DESTBLEND = SrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 3
-		DESTBLEND = INVSrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 4
-		DESTBLEND = SrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 5
-		DESTBLEND = INVSrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 6
-		DESTBLEND = DestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 7
-		DESTBLEND = INVDestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 8
-		DESTBLEND = DestColor;
-		#endif
-		#if DEST_BLEND_TYPE == 9
-		DESTBLEND = INVDestColor;
-		#endif
-		
-		#endif
-
-		#if ALPHA_BLEND_APPLY == 1
-		
-		#if ALPHA_BLEND_TYPE == 1
-		ALPHABLENDENABLE = FALSE;
-		#endif
-		
-		#if ALPHA_BLEND_TYPE == 2
-		ALPHABLENDENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if ALPHA_TEST_APPLY == 1
-		
-		#if ALPHA_TEST_TYPE == 1
-		ALPHATESTENABLE = FALSE;
-		#endif
-
-		#if ALPHA_TEST_TYPE == 2
-		ALPHATESTENABLE = TRUE;
-		#endif
-
-		#endif
-		
-		#if Z_WRITE_APPLY == 1
-		
-		#if Z_WRITE_TYPE == 1
-		ZWRITEENABLE = FALSE;
-		#endif
-		
-		#if Z_WRITE_TYPE == 2
-		ZWRITEENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if Z_ENABLE_APPLY == 1
-		
-		#if Z_TYPE == 1
-		ZENABLE = FALSE;
-		#endif
-		
-		#if Z_TYPE == 2
-		ZENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if CULLMODE_APPLY == 1
-		
-		#if CULLMODE_TYPE == 0
-		CULLMODE = NONE;
-		#endif
-		
-		#if CULLMODE_TYPE == 1
-		CULLMODE = CW;
-		#endif
-		
-		#if CULLMODE_TYPE == 2
-		CULLMODE = CCW;
-		#endif
-		
-		#endif
-        VertexShader = compile vs_3_0 BufferShadow_VS(true, true, false);
-        PixelShader  = compile ps_3_0 BufferShadow_PS(true, true, false);
-    }
-}
-
-// オブジェクト描画用テクニック（PMDモデル用）
-technique MainTecBS4  < string MMDPass = "object_ss"; bool UseTexture = false; bool UseSphereMap = false; bool UseToon = true; > {
-    pass DrawObject {
-		#if BLEND_APPLY == 1
-		
-		#if SRC_BLEND_TYPE == 0
-		SRCBLEND = ZERO;
-		#endif
-		#if SRC_BLEND_TYPE == 1
-		SRCBLEND = ONE;
-		#endif
-		#if SRC_BLEND_TYPE == 2
-		SRCBLEND = SrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 3
-		SRCBLEND = INVSrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 4
-		SRCBLEND = SrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 5
-		SRCBLEND = INVSrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 6
-		SRCBLEND = DestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 7
-		SRCBLEND = INVDestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 8
-		SRCBLEND = DestColor;
-		#endif
-		#if SRC_BLEND_TYPE == 9
-		SRCBLEND = INVDestColor;
-		#endif
-
-		#if DEST_BLEND_TYPE == 0
-		DESTBLEND = ZERO;
-		#endif
-		#if DEST_BLEND_TYPE == 1
-		DESTBLEND = ONE;
-		#endif
-		#if DEST_BLEND_TYPE == 2
-		DESTBLEND = SrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 3
-		DESTBLEND = INVSrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 4
-		DESTBLEND = SrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 5
-		DESTBLEND = INVSrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 6
-		DESTBLEND = DestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 7
-		DESTBLEND = INVDestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 8
-		DESTBLEND = DestColor;
-		#endif
-		#if DEST_BLEND_TYPE == 9
-		DESTBLEND = INVDestColor;
-		#endif
-		
-		#endif
-
-		#if ALPHA_BLEND_APPLY == 1
-		
-		#if ALPHA_BLEND_TYPE == 1
-		ALPHABLENDENABLE = FALSE;
-		#endif
-		
-		#if ALPHA_BLEND_TYPE == 2
-		ALPHABLENDENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if ALPHA_TEST_APPLY == 1
-		
-		#if ALPHA_TEST_TYPE == 1
-		ALPHATESTENABLE = FALSE;
-		#endif
-
-		#if ALPHA_TEST_TYPE == 2
-		ALPHATESTENABLE = TRUE;
-		#endif
-
-		#endif
-		
-		#if Z_WRITE_APPLY == 1
-		
-		#if Z_WRITE_TYPE == 1
-		ZWRITEENABLE = FALSE;
-		#endif
-		
-		#if Z_WRITE_TYPE == 2
-		ZWRITEENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if Z_ENABLE_APPLY == 1
-		
-		#if Z_TYPE == 1
-		ZENABLE = FALSE;
-		#endif
-		
-		#if Z_TYPE == 2
-		ZENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if CULLMODE_APPLY == 1
-		
-		#if CULLMODE_TYPE == 0
-		CULLMODE = NONE;
-		#endif
-		
-		#if CULLMODE_TYPE == 1
-		CULLMODE = CW;
-		#endif
-		
-		#if CULLMODE_TYPE == 2
-		CULLMODE = CCW;
-		#endif
-		
-		#endif
-        VertexShader = compile vs_3_0 BufferShadow_VS(false, false, true);
-        PixelShader  = compile ps_3_0 BufferShadow_PS(false, false, true);
-    }
-}
-
-technique MainTecBS5  < string MMDPass = "object_ss"; bool UseTexture = true; bool UseSphereMap = false; bool UseToon = true; > {
-    pass DrawObject {
-		#if BLEND_APPLY == 1
-		
-		#if SRC_BLEND_TYPE == 0
-		SRCBLEND = ZERO;
-		#endif
-		#if SRC_BLEND_TYPE == 1
-		SRCBLEND = ONE;
-		#endif
-		#if SRC_BLEND_TYPE == 2
-		SRCBLEND = SrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 3
-		SRCBLEND = INVSrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 4
-		SRCBLEND = SrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 5
-		SRCBLEND = INVSrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 6
-		SRCBLEND = DestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 7
-		SRCBLEND = INVDestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 8
-		SRCBLEND = DestColor;
-		#endif
-		#if SRC_BLEND_TYPE == 9
-		SRCBLEND = INVDestColor;
-		#endif
-
-		#if DEST_BLEND_TYPE == 0
-		DESTBLEND = ZERO;
-		#endif
-		#if DEST_BLEND_TYPE == 1
-		DESTBLEND = ONE;
-		#endif
-		#if DEST_BLEND_TYPE == 2
-		DESTBLEND = SrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 3
-		DESTBLEND = INVSrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 4
-		DESTBLEND = SrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 5
-		DESTBLEND = INVSrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 6
-		DESTBLEND = DestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 7
-		DESTBLEND = INVDestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 8
-		DESTBLEND = DestColor;
-		#endif
-		#if DEST_BLEND_TYPE == 9
-		DESTBLEND = INVDestColor;
-		#endif
-		
-		#endif
-
-		#if ALPHA_BLEND_APPLY == 1
-		
-		#if ALPHA_BLEND_TYPE == 1
-		ALPHABLENDENABLE = FALSE;
-		#endif
-		
-		#if ALPHA_BLEND_TYPE == 2
-		ALPHABLENDENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if ALPHA_TEST_APPLY == 1
-		
-		#if ALPHA_TEST_TYPE == 1
-		ALPHATESTENABLE = FALSE;
-		#endif
-
-		#if ALPHA_TEST_TYPE == 2
-		ALPHATESTENABLE = TRUE;
-		#endif
-
-		#endif
-		
-		#if Z_WRITE_APPLY == 1
-		
-		#if Z_WRITE_TYPE == 1
-		ZWRITEENABLE = FALSE;
-		#endif
-		
-		#if Z_WRITE_TYPE == 2
-		ZWRITEENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if Z_ENABLE_APPLY == 1
-		
-		#if Z_TYPE == 1
-		ZENABLE = FALSE;
-		#endif
-		
-		#if Z_TYPE == 2
-		ZENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if CULLMODE_APPLY == 1
-		
-		#if CULLMODE_TYPE == 0
-		CULLMODE = NONE;
-		#endif
-		
-		#if CULLMODE_TYPE == 1
-		CULLMODE = CW;
-		#endif
-		
-		#if CULLMODE_TYPE == 2
-		CULLMODE = CCW;
-		#endif
-		
-		#endif
-        VertexShader = compile vs_3_0 BufferShadow_VS(true, false, true);
-        PixelShader  = compile ps_3_0 BufferShadow_PS(true, false, true);
-    }
-}
-
-technique MainTecBS6  < string MMDPass = "object_ss"; bool UseTexture = false; bool UseSphereMap = true; bool UseToon = true; > {
-    pass DrawObject {
-		#if BLEND_APPLY == 1
-		
-		#if SRC_BLEND_TYPE == 0
-		SRCBLEND = ZERO;
-		#endif
-		#if SRC_BLEND_TYPE == 1
-		SRCBLEND = ONE;
-		#endif
-		#if SRC_BLEND_TYPE == 2
-		SRCBLEND = SrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 3
-		SRCBLEND = INVSrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 4
-		SRCBLEND = SrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 5
-		SRCBLEND = INVSrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 6
-		SRCBLEND = DestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 7
-		SRCBLEND = INVDestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 8
-		SRCBLEND = DestColor;
-		#endif
-		#if SRC_BLEND_TYPE == 9
-		SRCBLEND = INVDestColor;
-		#endif
-
-		#if DEST_BLEND_TYPE == 0
-		DESTBLEND = ZERO;
-		#endif
-		#if DEST_BLEND_TYPE == 1
-		DESTBLEND = ONE;
-		#endif
-		#if DEST_BLEND_TYPE == 2
-		DESTBLEND = SrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 3
-		DESTBLEND = INVSrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 4
-		DESTBLEND = SrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 5
-		DESTBLEND = INVSrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 6
-		DESTBLEND = DestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 7
-		DESTBLEND = INVDestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 8
-		DESTBLEND = DestColor;
-		#endif
-		#if DEST_BLEND_TYPE == 9
-		DESTBLEND = INVDestColor;
-		#endif
-		
-		#endif
-
-		#if ALPHA_BLEND_APPLY == 1
-		
-		#if ALPHA_BLEND_TYPE == 1
-		ALPHABLENDENABLE = FALSE;
-		#endif
-		
-		#if ALPHA_BLEND_TYPE == 2
-		ALPHABLENDENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if ALPHA_TEST_APPLY == 1
-		
-		#if ALPHA_TEST_TYPE == 1
-		ALPHATESTENABLE = FALSE;
-		#endif
-
-		#if ALPHA_TEST_TYPE == 2
-		ALPHATESTENABLE = TRUE;
-		#endif
-
-		#endif
-		
-		#if Z_WRITE_APPLY == 1
-		
-		#if Z_WRITE_TYPE == 1
-		ZWRITEENABLE = FALSE;
-		#endif
-		
-		#if Z_WRITE_TYPE == 2
-		ZWRITEENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if Z_ENABLE_APPLY == 1
-		
-		#if Z_TYPE == 1
-		ZENABLE = FALSE;
-		#endif
-		
-		#if Z_TYPE == 2
-		ZENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if CULLMODE_APPLY == 1
-		
-		#if CULLMODE_TYPE == 0
-		CULLMODE = NONE;
-		#endif
-		
-		#if CULLMODE_TYPE == 1
-		CULLMODE = CW;
-		#endif
-		
-		#if CULLMODE_TYPE == 2
-		CULLMODE = CCW;
-		#endif
-		
-		#endif
-        VertexShader = compile vs_3_0 BufferShadow_VS(false, true, true);
-        PixelShader  = compile ps_3_0 BufferShadow_PS(false, true, true);
-    }
-}
-
-technique MainTecBS7  < string MMDPass = "object_ss"; bool UseTexture = true; bool UseSphereMap = true; bool UseToon = true; > {
-    pass DrawObject {
-		#if BLEND_APPLY == 1
-		
-		#if SRC_BLEND_TYPE == 0
-		SRCBLEND = ZERO;
-		#endif
-		#if SRC_BLEND_TYPE == 1
-		SRCBLEND = ONE;
-		#endif
-		#if SRC_BLEND_TYPE == 2
-		SRCBLEND = SrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 3
-		SRCBLEND = INVSrcColor;
-		#endif
-		#if SRC_BLEND_TYPE == 4
-		SRCBLEND = SrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 5
-		SRCBLEND = INVSrcAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 6
-		SRCBLEND = DestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 7
-		SRCBLEND = INVDestAlpha;
-		#endif
-		#if SRC_BLEND_TYPE == 8
-		SRCBLEND = DestColor;
-		#endif
-		#if SRC_BLEND_TYPE == 9
-		SRCBLEND = INVDestColor;
-		#endif
-
-		#if DEST_BLEND_TYPE == 0
-		DESTBLEND = ZERO;
-		#endif
-		#if DEST_BLEND_TYPE == 1
-		DESTBLEND = ONE;
-		#endif
-		#if DEST_BLEND_TYPE == 2
-		DESTBLEND = SrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 3
-		DESTBLEND = INVSrcColor;
-		#endif
-		#if DEST_BLEND_TYPE == 4
-		DESTBLEND = SrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 5
-		DESTBLEND = INVSrcAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 6
-		DESTBLEND = DestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 7
-		DESTBLEND = INVDestAlpha;
-		#endif
-		#if DEST_BLEND_TYPE == 8
-		DESTBLEND = DestColor;
-		#endif
-		#if DEST_BLEND_TYPE == 9
-		DESTBLEND = INVDestColor;
-		#endif
-		
-		#endif
-
-		#if ALPHA_BLEND_APPLY == 1
-		
-		#if ALPHA_BLEND_TYPE == 1
-		ALPHABLENDENABLE = FALSE;
-		#endif
-		
-		#if ALPHA_BLEND_TYPE == 2
-		ALPHABLENDENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if ALPHA_TEST_APPLY == 1
-		
-		#if ALPHA_TEST_TYPE == 1
-		ALPHATESTENABLE = FALSE;
-		#endif
-
-		#if ALPHA_TEST_TYPE == 2
-		ALPHATESTENABLE = TRUE;
-		#endif
-
-		#endif
-		
-		#if Z_WRITE_APPLY == 1
-		
-		#if Z_WRITE_TYPE == 1
-		ZWRITEENABLE = FALSE;
-		#endif
-		
-		#if Z_WRITE_TYPE == 2
-		ZWRITEENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if Z_ENABLE_APPLY == 1
-		
-		#if Z_TYPE == 1
-		ZENABLE = FALSE;
-		#endif
-		
-		#if Z_TYPE == 2
-		ZENABLE = TRUE;
-		#endif
-		
-		#endif
-		
-		#if CULLMODE_APPLY == 1
-		
-		#if CULLMODE_TYPE == 0
-		CULLMODE = NONE;
-		#endif
-		
-		#if CULLMODE_TYPE == 1
-		CULLMODE = CW;
-		#endif
-		
-		#if CULLMODE_TYPE == 2
-		CULLMODE = CCW;
-		#endif
-		
-		#endif
-        VertexShader = compile vs_3_0 BufferShadow_VS(true, true, true);
-        PixelShader  = compile ps_3_0 BufferShadow_PS(true, true, true);
+        VertexShader = compile vs_3_0 BufferShadow_VS();
+        PixelShader  = compile ps_3_0 BufferShadow_PS();
     }
 }
 

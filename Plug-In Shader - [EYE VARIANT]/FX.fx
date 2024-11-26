@@ -99,6 +99,11 @@ float NormalMap_Intensity = 0.5;
 float Alpha_Clip        = 0.0; //Set a value from 0 to 1
 
 //////////////////////////////////////////////////////////////////////////////////////
+// Alpha Post Processing (Render Target)
+
+#define APPLY_ALPHA_POST_PROCESSING 0
+
+//////////////////////////////////////////////////////////////////////////////////////
 // Alpha Color Channel
 
 #define APPLY_COLOR_ALPHA 0
@@ -219,6 +224,8 @@ float RimShadow_Intensity = 1.0;
 
 float RimShadow_Smooth = 1.5;
 
+float RimShadow_Direction = -2;
+
 float3 RimShadow_Color = float3(1.0,1.0,1.0);
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -291,7 +298,7 @@ float3 Ambient_Occlussion_Color = float3(0,0,0);
 // IBL
 
 #define APPLY_IBL 0
-#define APPLY_IBL_SPECULAR 1
+#define APPLY_IBL_SPECULAR 0
 #define APPLY_IBL_LIGHT_DIRECTION 1
 #define APPLY_IBL_LIGHT_AMBIENT 0
 
