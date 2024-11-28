@@ -537,7 +537,7 @@ BufferEdge_OUTPUT ColorRender_VS(float4 Pos : POSITION, float3 Normal : NORMAL)
 	Out.Pos = mul( Pos, WorldViewProjMatrix );
 	
 	Out.Pos.xyz += Out.Normal;
-	Out.Pos.xyz *= 0.01 + 1;
+	Out.Pos.z *= 0.01 + 1;
 	
     return Out;
 }
@@ -1712,7 +1712,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 		float U = SoftShadowParam / SHADOWMAP_SIZE;
 		float V = SoftShadowParam / SHADOWMAP_SIZE;
         if(parthf) {
-            // セルフシャドウ mode2
+            // 繧ｻ繝ｫ繝輔す繝｣繝峨え mode2
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(0,0)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(U,0)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(-U,0)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
@@ -1723,7 +1723,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(-U,-V)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(U,-V)).r , 0.0f)*SKII2*TransTexCoord.y-0.3f);
         } else {
-            // セルフシャドウ mode1
+            // 繧ｻ繝ｫ繝輔す繝｣繝峨え mode1
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(0,0)).r , 0.0f)*SKII1-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(U,0)).r , 0.0f)*SKII1-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(-U,0)).r , 0.0f)*SKII1-0.3f);
