@@ -3,7 +3,7 @@
 
 # GET EARLY ACCESS TO PLUG-IN's NEW VERSIONS ON: 💙
 - [Patreon](patreon.com/c/JoshuaWithJ)
-- 
+  
 # CONTACT AND SUPPORT:
 - [Carrd](https://joshuawithj.carrd.co)
 - [Ko-Fi](https://ko-fi.com/joshuawithj)
