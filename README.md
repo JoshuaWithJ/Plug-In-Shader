@@ -48,7 +48,8 @@
 - IBL Post Processing.
 - Alpha Post Processing.
 - Point Lights.
-  [Different Variants]
+
+[Different Shader Variants]
 - VARIANTS: Glitter, Hair Layer, Eyes.
 
 # RULES: 💙
