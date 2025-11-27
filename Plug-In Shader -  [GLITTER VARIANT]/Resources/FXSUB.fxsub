@@ -526,7 +526,7 @@ bool	spadd;    // Sphere map additive composition flag
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //NormalMap
-    #if APPLY_NORMALMAP == 1
+
 float3x3 compute_tangent_frame(float3 N, float3 p, float2 uv)
 {
     float3 dp1 = ddx( p );
@@ -548,7 +548,6 @@ float3x3 compute_tangent_frame(float3 N, float3 p, float2 uv)
     float invmax = rsqrt( max( dot(T,T), dot(B,B) ) );
     return float3x3( T * invmax, B * -invmax, N );
 }
-    #endif
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if APPLY_BILLBOARD == 1
@@ -565,33 +564,25 @@ float3 BillboardMB : CONTROLOBJECT < string name = Billboard_Model_Name ; string
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Edge Line
 
-struct BufferEdge_OUTPUT {
-    float4 Pos      : POSITION;
-	float3 Normal   : TEXCOORD2;
-};
-
-BufferEdge_OUTPUT ColorRender_VS(float4 Pos : POSITION, float3 Normal : NORMAL)
+float4 ColorRender_VS(float4 Pos : POSITION) : POSITION 
 {
-	BufferEdge_OUTPUT Out = (BufferEdge_OUTPUT)0;
-	
-	Out.Pos = mul( Pos, WorldViewProjMatrix );
-	
-	Out.Pos.xyz += Out.Normal;
-	Out.Pos.z *= 0.01 + 1;
-	
-    return Out;
+    // World view projection transformation of camera viewpoint
+    return mul( Pos, WorldViewProjMatrix );
 }
+
 // Pixel Shader
 float4 ColorRender_PS() : COLOR
 {
     // Edge Line Color
-	float4 EdgeColor = Edge_Line_Color;
     return EdgeColor;
 }
 
 // Techniques
 technique EdgeTec < string MMDPass = "edge"; > {
-	pass DrawEdge {
+    pass DrawEdge {
+        AlphaBlendEnable = FALSE;
+        AlphaTestEnable  = FALSE;
+
         VertexShader = compile vs_2_0 ColorRender_VS();
         PixelShader  = compile ps_2_0 ColorRender_PS();
     }
@@ -676,7 +667,7 @@ BufferShadow_OUTPUT BufferShadow_VS(BufferShadow_INPUT IN)
 	#endif
 	#endif
 	
-	Out.PosWorld = mul( IN.Pos, WorldMatrix );
+	Out.PosWorld = mul(IN.Pos, WorldMatrix);
 	
 	// HgShadow
 	Out.PPos = Out.Pos;
@@ -712,6 +703,55 @@ float3x3 Set_Rotation(float3 in_axis, float s, float c)
 	float rand(float2 co) {
     return frac(sin(dot(co * 16, float2(12.9898, 78.233))) * 43758.5453);
 }
+//////////////////////////////////////////////////
+
+float2 hash2(float2 p)
+{
+    p = float2(dot(p, float2(127.1, 311.7)),
+               dot(p, float2(269.5, 183.3)));
+    return frac(sin(p) * 43758.5453);
+}
+
+// Hash that gives random float3 color in [0,1]
+float3 hash3(float2 p)
+{
+    float3 q = float3(dot(p, float2(127.1, 311.7)),
+                      dot(p, float2(269.5, 183.3)),
+                      dot(p, float2(419.2, 371.9)));
+    return frac(sin(q) * 43758.5453);
+}
+
+float3 voronoiColor(float2 uv)
+{
+    float2 g = floor(uv);  // base grid cell
+    float2 f = frac(uv);   // fractional position
+    
+    float minDist = 1.0;
+    float3 cellColor = 0;
+    
+    // Check neighbors
+    [unroll]
+    for (int y = -1; y <= 1; y++)
+    {
+        [unroll]
+        for (int x = -1; x <= 1; x++)
+        {
+            float2 neighbor = float2(x, y);
+            float2 rnd = hash2(g + neighbor);
+            float2 diff = neighbor + rnd - f;
+            float d = dot(diff, diff);
+            
+            if (d < minDist)
+            {
+                minDist = d;
+                cellColor = hash3(g + neighbor); // use hash as cell color
+            }
+        }
+    }
+    
+    return cellColor;
+}
+
 //////////////////////////////////////////////////
 
 	#if APPLY_TONE_MAP == 1
@@ -991,6 +1031,27 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	#endif
 	
 //////////////////////////////////////////////////
+// Glitter
+
+	#if APPLY_GLITTER == 1
+	float2 GlitterUV = UV * Glitter_Scale;
+	float3 d = voronoiColor(GlitterUV);
+	
+	float3 GlitterNormalMap		= d;	
+	float3x3 GlittertangentFrame	= compute_tangent_frame(Normal, IN.PosWorld.xyz, IN.UV);
+	GlitterNormalMap.z				-= Glitter_Normal_Intensity;
+	
+	float3 GlitterN = normalize(mul((GlitterNormalMap * 2.0 - 1.0), GlittertangentFrame));
+	Normal = normalize(Normal + GlitterN * Glitter_Normal_Intensity);
+
+	
+	float3 ReflectColor = lerp(0.04, Color.rgb, Metallic);
+	float3 ReflectFresnel = ReflectColor + (1 - ReflectColor) * pow(1 - saturate(dot(Normal, IN.PosWorld)), 5);
+
+	Color.rgb = lerp(Color.rgb,Color.rgb * d.rgb,Glitter_Intensity);
+	#endif
+	
+//////////////////////////////////////////////////
 //Specular Map
 
 	#if APPLY_SPECULARMAP == 1
@@ -998,6 +1059,8 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	#endif
 
 //////////////////////////////////////////////////
+//Specular
+
 	#if APPLY_ANISO == 0
 	#if APPLY_SPECULAR == 1
 	
@@ -1008,8 +1071,6 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	#if APPLY_SHADER_SPECULAR == 1
 	float3 Specular		= pow( max(0,dot( HalfVector, Normal )), Specular_Shininess );
 	#endif
-	
-	Specular = step( 0.5 , Specular) ? 1 : 0;
 	
 	#if APPLY_SPECULARMAP == 1
 	Specular.rgb		*= SpecularMap.rgb + SpecularMap.rgb;
@@ -1044,19 +1105,15 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	
 	#if APPLY_RIMLIGHT_TYPE == 1
 	#if APPLY_SHADER_SPECULAR == 0
-	float4 RimLight		= saturate(pow( 1 - dot(Normal, RimEye), 1 * SpecularPower * float(0.5)));
+	float4 RimLight		= saturate(pow( 1 - dot(Normal, RimEye), 1 * SpecularPower * float(0.5) ) * float4(SpecularColor.rgb,0));
 	#endif
 	#endif
 	
 	#if APPLY_RIMLIGHT_TYPE == 1
 	#if APPLY_SHADER_SPECULAR == 1
-	float4 RimLight		= saturate(pow( 1 - dot(Normal, RimEye), 1 * Specular_Shininess * float(0.5)));
+	float3 RimLight		= saturate(pow( 1 - dot(Normal, RimEye), 1 * Specular_Shininess * float(0.5) ) * float4(Specular_Color.rgb,0));
 	#endif
 	#endif
-	
-	RimLight = step( 0.5 , RimLight) ? 1 : 0;
-	
-	RimLight *= Specular_Color;
 	
 	#if APPLY_SPECULARMAP == 1
 	RimLight.rgb *= SpecularMap.rgb + SpecularMap.rgb;
@@ -1084,11 +1141,8 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	float3 RimCEye = normalize(Eye + RIMCDIR);
 	#endif
 	
-	float4 RimLightC		= saturate(pow( 1 - dot(Normal, RimCEye), Custom_RimLight_Size / 10 ));
+	float4 RimLightC		= saturate(pow( 1 - dot(Normal, RimCEye), Custom_RimLight_Size / 10 ) * float4(Custom_RimLight_Color.rgb,0));
 	
-	RimLightC = step( 0.5 , RimLightC) ? 1 : 0;
-	
-	RimLightC.rgb *= Custom_RimLight_Color;
 	RimLightC.rgb *= 1.5 * LightAmbient;
 	
 	#endif
@@ -1101,6 +1155,11 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	sphTex.x = sphTex.x * 0.5f + 0.5f;
 	sphTex.y = sphTex.y * -0.5f + 0.5f;
 	float4 SPAMap = tex2D(ObjSphareSampler,sphTex) * 1;
+	
+	#if APPLY_GLITTER == 1
+	float4 SPAMapG = tex2D(ObjSphareSampler,sphTex) * 1;
+	Color.rgb = lerp(Color.rgb , SPAMapG.rgb * ReflectFresnel, Metallic);
+	#endif
 	
 	#if APPLY_SPECULARMAP == 1
 	SPAMap.rgb *= SpecularMap.a;
@@ -1128,12 +1187,17 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	
 	float4 CubeMap = texCUBE(CubeMapSampler, CubeMapReflection);
 	
+	#if APPLY_GLITTER == 1
+	float4 CubeMapG = texCUBE(CubeMapSampler, CubeMapReflection);
+	Color.rgb = lerp(Color.rgb , CubeMapG.rgb * ReflectFresnel, Metallic);
+	#endif
+	
 	#if APPLY_SPECULARMAP == 1
 	CubeMap.rgb *= SpecularMap.a;
 	#endif
 
 	CubeMap.rgb *= Specular_Color.a;
-
+	
 	#endif
 //////////////////////////////////////////////////
 //REFRACTION
@@ -1177,6 +1241,22 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	#endif
 	#endif
 	
+	#if APPLY_GLITTER == 1
+	#if APPLY_REFRACTION == 1
+	#if APPLY_REFRACTION_REFLECTION == 0
+	float4 RefractedColorG = texCUBE(Refraction_Sampler, Refract) * Refraction_Intensity;
+	#endif
+	#endif
+
+	#if APPLY_REFRACTION == 1
+	#if APPLY_REFRACTION_REFLECTION == 1
+	float4 RefractedColorG = texDP(sampEnvMapF, sampEnvMapB, Refract) * Refraction_Intensity;
+	#endif
+	#endif
+	
+	Color.rgb = lerp(Color.rgb , RefractedColorG.rgb * ReflectFresnel, Metallic);
+	#endif
+	
 		#if APPLY_REFRACTION == 1
 		#if APPLY_REFRACTION_SPECULARMAP == 1
 		#if APPLY_SPECULARMAP == 1
@@ -1206,15 +1286,11 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	#endif
 	
 	#if APPLY_SHADER_SPECULAR == 0
-	float3 Fresnel = saturate(pow( 1 - dot(Normal, FresnelEye), 1 * SpecularPower * float(0.5)));
+	float3 Fresnel = saturate(pow( 1 - dot(Normal, FresnelEye), 1 * SpecularPower * float(0.5) )  * Specular_Color.a);
 	#endif
 	#if APPLY_SHADER_SPECULAR == 1
-	float3 Fresnel = saturate(pow( 1 - dot(Normal, FresnelEye), 1 * Specular_Shininess * float(0.5)));
+	float3 Fresnel = saturate(pow( 1 - dot(Normal, FresnelEye), 1 * Specular_Shininess * float(0.5) ) * Specular_Color.a);
 	#endif
-	
-	Fresnel = step( 0.5 , Fresnel) ? 1 : 0;
-	
-	Fresnel *= Specular_Color.a;
 	
 	#if APPLY_CUBEMAP == 1
 	float4 CubeMapF = texCUBE(CubeMapSampler, CubeMapReflection);
@@ -1267,10 +1343,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	float4 ANISO_X = tex2D(Aniso_Samp, AnisoCoord);
 	
 	ANISO_X.yz = pow(ANISO_X.yz, Aniso_Size * 5);
-	
-	float3 ANISO_X_T = lerp(step( 1.0 , ANISO_X) ? 1 : 0, ANISO_X, step( 2.0 , ANISO_X) ? 1 : 0);
-	ANISO_X.rgb = lerp(ANISO_X,1, -ANISO_X_T * 0.5);
-	
+
     float2 aniso_coef;
     aniso_coef = float2(dot(Normal, -LightDirection.xyz).xx) * float2(0.7, -0.7) + float2(0.3, 0.3);
     aniso_coef = ANISO_X.yz * clamp(aniso_coef, (0.0), (1.0)) * float2(0.18, 0.05);
@@ -1302,13 +1375,11 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	
 	#if APPLY_SHADER_SPECULAR == 0
 	Aniso = max(Aniso_Back, sin(radians((HdotA + 0) * 180)* Aniso_Size));
-	Aniso = lerp(Aniso,1,step( 0.5 , Aniso) ? 1 : 0);
 	Aniso.rgb *= SpecularColor;
 	#endif
 
 	#if APPLY_SHADER_SPECULAR == 1
 	Aniso = max(Aniso_Back, sin(radians((HdotA + 0) * 180)* Aniso_Size));
-	Aniso = lerp(Aniso,1,step( 0.5 , Aniso) ? 1 : 0);
 	Aniso.rgb *= Specular_Color;
 	#endif
 	
@@ -1328,7 +1399,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	#endif
 
 //////////////////////////////////////////////////
-//RimShadow
+//Rim Shadow
 	
 	#if APPLY_RIMSHADOW == 1
 	
@@ -1354,19 +1425,18 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	float3 RimS1Eye = normalize(Eye + RimS1DIR);
 	#endif
 	
-	float4 RimShadow = saturate(pow( 1 - dot(Normal, RimS1Eye), RimShadow_Size / 10 ));
+	float4 RimShadow = saturate(pow( 1 - dot(Normal, RimS1Eye), RimShadow_Size / 10 )) * RimShadow_Intensity;
 	
-	RimShadow = step( 0.5 , RimShadow) ? 1 : 0;
+	float RimShadowSmooth = smoothstep(0.0, RimShadow_Smooth, 1);
 	
-	RimShadow = smoothstep(0.5 - RimShadow_Smooth * 0.5, 0.5 + RimShadow_Smooth * 0.5, RimShadow );
-	
-	RimShadow.rgb *= RimShadow_Intensity;
+	RimShadow = RimShadowSmooth * RimShadow;
 	
 	RimShadow.rgb *= RimShadow_Color;
 	
 	RimShadow.rgb *= 1.5  * LightAmbient;
 	
 	Color.rgb -= 0 + RimShadow.rgb;
+	
 	
 	#endif
 	
@@ -1548,17 +1618,23 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	Ref.rgb = lerp(Ref.rgb,1,Specular);
 	#endif
 	#endif
+	#if APPLY_GLITTER == 0
 	#if APPLY_SPA == 1
 	Color.rgb = lerp(Color.rgb,1,SPAMap);
+	#endif
 	#endif
 	#if APPLY_RIMLIGHT_TYPE == 1
 	Ref.rgb = lerp(Ref.rgb,1,RimLight);
 	#endif
+	#if APPLY_GLITTER == 0
 	#if APPLY_CUBEMAP == 1
 	Color.rgb = lerp(Color.rgb,1,CubeMap);
 	#endif
+	#endif
+	#if APPLY_GLITTER == 0
 	#if APPLY_REFRACTION == 1
 	Ref.rgb = lerp(Ref.rgb,1,RefractedColor);
+	#endif
 	#endif
 	#if APPLY_RIMLIGHT_TYPE == 2
 	Ref.rgb = lerp(Ref.rgb,1,Fresnel);
@@ -1591,17 +1667,23 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	Ref.rgb += Specular;
 	#endif
 	#endif
+	#if APPLY_GLITTER == 0
 	#if APPLY_SPA == 1
 	Color.rgb += SPAMap;
+	#endif
 	#endif
 	#if APPLY_RIMLIGHT_TYPE == 1
 	Ref.rgb += RimLight;
 	#endif
+	#if APPLY_GLITTER == 0
 	#if APPLY_CUBEMAP == 1
 	Color.rgb += CubeMap;
 	#endif
+	#endif
+	#if APPLY_GLITTER == 0
 	#if APPLY_REFRACTION == 1
 	Color.rgb += RefractedColor;
+	#endif
 	#endif
 	#if APPLY_RIMLIGHT_TYPE == 2
 	Ref.rgb += Fresnel;
@@ -1911,6 +1993,8 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	#endif
 	
 	#if APPLY_ALPHA == 1
+	DiffuseColor.a = clamp(DiffuseColor.a, 0.0f, 1.0f);
+
 	Color.a *= DiffuseColor.a;
 	ShadowColor.a *= DiffuseColor.a;
 	#endif
@@ -1955,16 +2039,16 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
         }
 		float LightNormal = dot(-LightDirection, lerp(IN.Normal,Normal, 0.5) );
 		LightNormal = smoothstep(0.5 - Toon_Smooth * 0.5, 0.5 + Toon_Smooth * 0.5, LightNormal);
-		
+
         ShadowComp = 1-saturate(ShadowComp/9);
 		ShadowComp = min(saturate(LightNormal * Toon), ShadowComp);
+
 //////////////////////////////////////////////////
 	if(HgShadow_Valid)
 	{
-		float comp = HgShadow_GetSelfShadowRate(IN.PPos);
-		comp = min(saturate(LightNormal * Toon), comp);
-		ShadowComp = comp;
-		ShadowComp = step( 0.5 , ShadowComp) ? 1 : 0;
+        float comp = HgShadow_GetSelfShadowRate(IN.PPos);
+         comp = min(saturate(LightNormal * Toon), comp);
+	     ShadowComp = comp;
 	}
 
 //////////////////////////////////////////////////
@@ -2067,7 +2151,6 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	ShadowColor *= Toon_Intensity;
 	
 	Color.rgb  = lerp(Color.rgb * ShadowColor.rgb, Color.rgb, ShadowComp);
-	ShadowComp -= (ShadowComp < 0.1) ? 1 : 0 ;
 	
 //////////////////////////////////////////////////
 	

@@ -74,6 +74,29 @@ sampler NormalMapSampler = sampler_state {
 	ADDRESSW  = WRAP;
 	MAXANISOTROPY = 16;
 };
+
+#if APPLY_DETAIL_NORMALMAP == 1
+//Detail Normal Map
+#if APPLY_ANIMATED_DETAIL_NORMALMAP == 0
+texture2D DetailNormalMap <
+#endif
+#if APPLY_ANIMATED_DETAIL_NORMALMAP == 1
+texture2D DetailNormalMap : ANIMATEDTEXTURE <
+#endif
+    string ResourceName = DetailNormalMap_Texture
+>;
+sampler DetailNormalMapSampler = sampler_state {
+    texture = <DetailNormalMap>;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
+};
+#endif
+
 #endif
 
 #if APPLY_SPECULARMAP == 1
@@ -425,6 +448,21 @@ sampler2D ART_Samp = sampler_state {
 };
 #endif
 
+#define PLRT_Control  "PointLight.x"
+bool PLRT_Valid  : CONTROLOBJECT < string name = PLRT_Control; >;
+
+shared texture2D PointLight : RENDERCOLORTARGET;
+sampler2D PointLight_Samp = sampler_state {
+    texture = <PointLight>;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
+};
+
 // This description is to avoid overwriting the original MMD sampler. Cannot be deleted.
 sampler MMDSamp0 : register(s0);
 sampler MMDSamp1 : register(s1);
@@ -440,6 +478,8 @@ float4x4 WorldViewMatrixInverse		: WORLDVIEWINVERSE;
 
 float3 	LightDirection    : DIRECTION < string Object = "Light"; >;
 float3	CameraPosition    : POSITION  < string Object = "Camera"; >;
+
+float	Time				: TIME;
 
 // Material color
 float4	MaterialDiffuse		: DIFFUSE  < string Object = "Geometry"; >;
@@ -471,7 +511,7 @@ float3	LightAmbient_B			: AMBIENT   < string Object = "Light"; >;
 float3	LightSpecular			: SPECULAR  < string Object = "Light"; >;
 static	float4 DiffuseColor		= MaterialDiffuse  * float4(LightDiffuse, 1.0f);
 static	float3 SpecularColor	= MaterialSpecular * LightSpecular;
-static	float3 LightAmbient		= (MaterialAmbient * LightAmbient_B * float(1.75) * MaterialEmmisive);
+static float3 LightAmbient		= LightAmbient_B * (MaterialEmmisive + MaterialAmbient);
 
 bool	parthf;   // Perspective flag
 bool	transp;   // Semi-transparent flag
@@ -496,11 +536,11 @@ float3x3 compute_tangent_frame(float3 N, float3 p, float2 uv)
 
     float3 dp2perp = cross( dp2, N );
     float3 dp1perp = cross( N, dp1 );
-    #if FLIP_NORMALMAP == 1
+    #if FLIP_NORMALMAP == 0
     float3 T = (dp2perp * duv1.x + dp1perp * duv2.x);
     float3 B = (dp2perp * duv1.y + dp1perp * duv2.y);
 	#endif
-    #if FLIP_NORMALMAP == 0
+    #if FLIP_NORMALMAP == 1
     float3 T = -(dp2perp * duv1.x + dp1perp * duv2.x);
     float3 B = -(dp2perp * duv1.y + dp1perp * duv2.y);
     #endif
@@ -578,11 +618,7 @@ struct BufferShadow_OUTPUT {
     float3 Eye      : TEXCOORD4; // Eye
     float4 ZCalcTex : TEXCOORD5; // ZCalcTex
     float4 PPos		: TEXCOORD8; // Positon for HgShadow
-	#if APPLY_HEIGHTMAP == 1
-	#if APPLY_HEIGHTMAP_TYPE == 0
 	float4 PosWorld : TEXCOORD7;
-	#endif
-	#endif
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -632,11 +668,7 @@ BufferShadow_OUTPUT BufferShadow_VS(BufferShadow_INPUT IN)
 	#endif
 	#endif
 	
-	#if APPLY_HEIGHTMAP == 1
-	#if APPLY_HEIGHTMAP_TYPE == 0
 	Out.PosWorld = mul( IN.Pos, WorldMatrix );
-	#endif
-	#endif
 	
 	// HgShadow
 	Out.PPos = Out.Pos;
@@ -666,6 +698,11 @@ float3x3 Set_Rotation(float3 in_axis, float s, float c)
     in_m1[1].z = temp.y + axis_s.x;
     in_m1[2].z = temp.z + c;
 	return in_m1;
+}
+//////////////////////////////////////////////////
+//Noise
+	float rand(float2 co) {
+    return frac(sin(dot(co * 16, float2(12.9898, 78.233))) * 43758.5453);
 }
 //////////////////////////////////////////////////
 
@@ -698,8 +735,10 @@ float2 yccLookup(float x)
     v9 *= 1 * Gama;
 	v9 += 1;
 	
-    v9 *= 1.0 + Gama_Plus * float(2.20);
-    v9 *= 1.0 - Gama_Less * float(0.8);
+    v9 *= 1.0 + Gama_Plus * 4.40;
+    v9 *= 1.0 - Gama_Less;
+	
+	v9 = clamp(v9, 0.8, 4.40);
 	
     float samples = 32;
     float scale = 1.0 / samples;
@@ -711,14 +750,13 @@ float2 yccLookup(float x)
     v11 *= v11;
     v11 *= v11;
     v11 *= v11;
+	
 	samples *= Saturation;
+
+	samples *= 1 + Saturation_Plus;
+	samples *= 1 + -Saturation_Less;
 	
-	float SaturationP = Saturation_Plus;
-	float SaturationL = Saturation_Less;
-	samples *= 1 + SaturationP;
-	samples *= 1 + -SaturationL;
-	
-	
+	samples = clamp(samples, 0.0, 62.0);
 	
     return float2( v10, v10 * ( samples / i ) * ( 1.0 - v11 ) );
 }
@@ -731,6 +769,8 @@ float3 ColorToneMapping( float3 c)
 	Exposure *= 1.0 + -Exp_Morph_Less;
 	
     exposure = 	lerp(exposure, Exposure, exposure);
+	
+	exposure = clamp(exposure, 0.0, 4.0);
 	
     float4 color;
     color.rgb = c;
@@ -898,7 +938,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 //////////////////////////////////////////////////
     float4 Color		= IN.Color;
 	
-	Color.rgb *= LightAmbient + 0.5 * saturate(LightAmbient);
+	Color.rgb *= clamp(LightAmbient, -2.0f, 2.0f);
 	
 	float4 TexColor		= tex2D( ObjTexSampler, UV );
 	
@@ -906,23 +946,15 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
     float4 ShadowColor	= 1;
 	
 	#if APPLY_SHADER_SHADOW_COLOR == 0
-	
-	if(SSS_Valid){
-	ShadowColor.rgb = lerp(ShadowColor.rgb, Shadow_Color * MaterialToon,Shadow_Color.a);
-	}else{
+
     ShadowColor	= MaterialToon;
-	}
-	
+
 	#endif
 	
 	#if APPLY_SHADER_SHADOW_COLOR == 1
 
-	if(SSS_Valid){
 	ShadowColor.rgb = lerp(ShadowColor.rgb, Shadow_Color * MaterialToon,Shadow_Color.a);
-	}else{
-	ShadowColor.rgb = lerp(ShadowColor.rgb, Shadow_Color * MaterialToon,Shadow_Color.a);
-	}
-	
+
 	#endif
 //////////////////////////////////////////////////
 //Front and Back Light
@@ -936,10 +968,18 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 //////////////////////////////////////////////////
 
 	#if APPLY_NORMALMAP == 1
-	float3 NormalMap		= tex2D( NormalMapSampler, UV).xyz * 2;		
-	float3x3 tangentFrame	= compute_tangent_frame(Normal, Eye, IN.UV);
+	float3 NormalMap = tex2D(NormalMapSampler, UV).xyz * 2.0 - 1.0;
+	NormalMap.y = -NormalMap.y;
+	
+	#if APPLY_DETAIL_NORMALMAP == 1
+	float3 DetailNormal = tex2D(DetailNormalMapSampler, UV * Detail_NormalMap_Scale).xyz * 2 - 1;
+	
+	NormalMap = lerp(NormalMap,float3((NormalMap.x + DetailNormal.x), (NormalMap.y + DetailNormal.y), (NormalMap.z)), Detail_NormalMap_Intensity);
+	#endif
+	
+	float3x3 tangentFrame	= compute_tangent_frame(Normal, IN.PosWorld.xyz, IN.UV);
 	NormalMap.z				-= NormalMap_Intensity;
-	Normal					= normalize(mul(NormalMap.xyz - 1.0f, tangentFrame));
+	Normal					= normalize(mul(NormalMap.xyz, tangentFrame));
 	#endif
 	
 //////////////////////////////////////////////////
@@ -1061,13 +1101,13 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	
 	#if APPLY_CUBEMAP == 1
 	#if APPLY_CUBEMAP_LIGHT_DIRECTION == 0
-	float3 CubeMapReflection = reflect(Normal, Eye);
+	float3 CubeMapReflection = reflect(Normal, Eye) * float3(1,1,-1);
 	#endif
 	#endif
 	
 	#if APPLY_CUBEMAP == 1
 	#if APPLY_CUBEMAP_LIGHT_DIRECTION == 1
-	float3 CubeMapReflection = reflect(Normal * float3(1,1,-1), EyeL);
+	float3 CubeMapReflection = reflect(Normal * float3(1,1,-1), EyeL * float3(-1,-1,1));
 	#endif
 	#endif
 	
@@ -1264,7 +1304,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	#endif
 
 //////////////////////////////////////////////////
-//Custom RimLight
+//RimShadow
 	
 	#if APPLY_RIMSHADOW == 1
 	
@@ -1292,9 +1332,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	
 	float4 RimShadow = saturate(pow( 1 - dot(Normal, RimS1Eye), RimShadow_Size / 10 )) * RimShadow_Intensity;
 	
-	float RimShadowSmooth = smoothstep(0.0, RimShadow_Smooth, 1);
-	
-	RimShadow = RimShadowSmooth * RimShadow;
+	RimShadow = smoothstep(0.5 - RimShadow_Smooth * 0.5, 0.5 + RimShadow_Smooth * 0.5, RimShadow );
 	
 	RimShadow.rgb *= RimShadow_Color;
 	
@@ -1305,6 +1343,161 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	
 	#endif
 	
+//////////////////////////////////////////////////
+// IBL
+	if(IBLRT_Valid)
+	{
+	
+	float2 texCoord = float2( ( IN.PPos.x/IN.PPos.w + 1.0f ) * 0.5f, 1.0f - ( IN.PPos.y/IN.PPos.w + 1.0f ) * 0.5f ) + 2;
+	
+	float4 IBL = tex2Dlod(IBLRT_Samp, float4(texCoord.xy, 0, 1)) * 0.5 * IBL_Brightness;
+
+
+	if(SSS_Valid)
+	{
+	#if APPLY_SUBSURFACETOON == 1
+	
+	float4 IBL1 = tex2Dlod(IBLRT_Samp, float4(texCoord.xy, 0, 1)) * 1.0;
+	float3 IBL_B		= pow( max(0,dot( (LightDirection * float3 (1.0,-1.0,1.0)), Normal )), 1 );
+	IBL1.rgb *= IBL_B.rgb;
+	ShadowColor.rgb = lerp(ShadowColor.rgb, ShadowColor.rgb + IBL1, 0.0 * IBL_Intensity);
+	
+	#else
+	
+	float4 IBL1 = tex2Dlod(IBLRT_Samp, float4(texCoord.xy, 0, 1)) * 1.0;
+	float3 IBL_B		= pow( max(0,dot( (LightDirection * float3 (1.0,-1.0,1.0)), Normal )), 1 );
+	IBL1.rgb *= IBL_B.rgb;
+	ShadowColor.rgb = lerp(ShadowColor.rgb, ShadowColor.rgb + IBL1, 0.5 * IBL_Intensity);
+	#endif
+	
+	} else {
+	
+	float4 IBL1 = tex2Dlod(IBLRT_Samp, float4(texCoord.xy, 0, 1)) * 1.0;
+	float3 IBL_B		= pow( max(0,dot( (LightDirection * float3 (1.0,-1.0,1.0)), Normal )), 1 );
+	IBL1.rgb *= IBL_B.rgb;
+	ShadowColor.rgb = lerp(ShadowColor.rgb, ShadowColor.rgb + IBL1, 0.5 * IBL_Intensity);
+	
+	}
+	
+	float4 IBL2 = tex2Dlod(SpecularRT_Samp, float4(texCoord.xy, 0, 1))* IBL_Brightness;
+	float4 IBL3 = tex2Dlod(IrradianceRT_Samp, float4(texCoord.xy, 0, 1)) * IBL_Brightness;
+
+    float4 IBL4 = sqrt(IBL2+IBL3);
+	
+	#if APPLY_IBL_LIGHT_AMBIENT == 1
+	
+	IBL.rgb *= LightAmbient.rgb + 0.5;
+	
+	IBL4.rgb *= LightAmbient.rgb + 0.5;
+	#endif
+	
+	Color.rgb = lerp(Color.rgb, Color.rgb * IBL.rgb, 0.25 * IBL_Intensity);
+	
+	#if APPLY_ANISO == 0
+	#if APPLY_SPECULAR == 1
+	Specular.rgb = lerp(Specular.rgb, Specular.rgb * IBL4.rgb, IBL_Intensity);
+	#endif
+	#endif
+
+	#if APPLY_ANISO == 1
+	Aniso.rgb = lerp(Aniso.rgb, Aniso.rgb * IBL4.rgb,IBL_Intensity);
+	#endif
+	
+	} else {
+	//////////////////////////////////////////////////
+	// OG IBL
+	#if APPLY_IBL == 1
+	
+	#if APPLY_IBL_LIGHT_DIRECTION == 0
+	float3 IBLPos = Normal * float3(1,1,-1);
+	#endif
+	
+	#if APPLY_IBL_LIGHT_DIRECTION == 1
+    float IBLrot_x = radians(22.5);
+    float IBLrot_y = radians(-22.5);
+    float IBLrot_z = radians(45);
+	float3x3 IBLRotationX = {
+	    {1,	0,	0},
+	    {0, cos(IBLrot_x), sin(IBLrot_x)},
+	    {0, -sin(IBLrot_x), cos(IBLrot_x)},
+	};
+	float3x3 IBLRotationY = {
+	    {cos(IBLrot_y), 0, -sin(IBLrot_y)},
+	    {0, 1, 0},
+		{sin(IBLrot_y), 0,cos(IBLrot_y)},
+	    };
+	float3x3 IBLRotationZ = {
+	    {cos(IBLrot_z), sin(IBLrot_z), 0},
+	    {-sin(IBLrot_z), cos(IBLrot_z), 0},
+	    {0, 0, 1},
+	};
+	float3x3 IBLRot = RotationTransform;
+    IBLRot = mul( IBLRot, IBLRotationX );
+    IBLRot = mul( IBLRot, IBLRotationY );
+    IBLRot = mul( IBLRot, IBLRotationZ );
+	float3 IBLPos = mul(Normal* float3(1,1,-1), (float3x3)IBLRot);
+	#endif
+	
+	float4 IBL = texCUBElod(IBLSampler, float4( IBLPos, 0)) * 0.5 * IBL_Brightness;
+	float4 IBL1 = texCUBElod(IBLSampler, float4( IBLPos, 0));
+	
+	if(SSS_Valid)
+	{
+	
+	#if APPLY_SUBSURFACETOON == 1
+	
+	IBL1 *= 0.0;
+	
+	#else
+	
+	IBL1 *= 0.5;
+	
+	#endif
+	
+	} else {
+	
+	IBL1 *= 0.5;
+	
+	}
+	
+	#if APPLY_IBL_SPECULAR == 1
+    float4 IBL2 = texCUBElod(IBLSampler3, float4(reflect(-Eye, Normal) * float3(1,1,-1),0)) * 0.5;
+	float4 IBL3 = texCUBElod(IBLSampler2, float4(reflect(-Eye, Normal) * float3(1,1,-1),0)) * 0.5;
+    float4 IBL4 = sqrt(IBL2+IBL3);
+	#endif
+	
+	#if APPLY_IBL_LIGHT_AMBIENT == 1
+	
+	IBL.rgb *= LightAmbient.rgb + 0.5;
+	
+	#if APPLY_IBL_SPECULAR == 1
+	IBL4.rgb *= LightAmbient.rgb + 0.5;
+	#endif
+	#endif
+	
+	float3 IBL_B		= pow( max(0,dot( (LightDirection * float3 (1.0,-1.0,1.0)), Normal )), 1 );
+	IBL1.rgb *= IBL_B.rgb;
+	
+	Color.rgb = lerp(Color.rgb, Color.rgb * IBL.rgb, 0.25 * IBL_Intensity);
+	ShadowColor.rgb = lerp(ShadowColor.rgb, ShadowColor.rgb + IBL1,IBL_Intensity);
+	
+	#if APPLY_IBL_SPECULAR == 1
+	#if APPLY_ANISO == 0
+	#if APPLY_SPECULAR == 1
+	Specular.rgb = lerp(Specular.rgb, Specular.rgb * IBL4.rgb,IBL_Intensity);
+	#endif
+	#endif
+	#endif
+	
+	#if APPLY_IBL_SPECULAR == 1
+	#if APPLY_ANISO == 1
+	Aniso.rgb = lerp(Aniso.rgb, Aniso.rgb * IBL4.rgb,IBL_Intensity);
+	#endif
+	#endif
+
+	#endif
+	//////////////////////////////////////////////////
+	}
 //////////////////////////////////////////////////
 //Texture
 
@@ -1478,6 +1671,18 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	#endif
 	#endif
 	
+//////////////////////////////////////////////////
+// Point Light
+
+	if(PLRT_Valid){
+	
+	float2 texCoord = float2( ( IN.PPos.x/IN.PPos.w + 1.0f ) * 0.5f, 1.0f - ( IN.PPos.y/IN.PPos.w + 1.0f ) * 0.5f ) + 2;
+	float4 PointLight = tex2Dlod(PointLight_Samp, float4(texCoord.xy, 0, 1));
+
+	Color.rgb += PointLight.rgb;
+
+	}
+
 //////////////////////////////////////////////////
 		//ALPHA
 		#if APPLY_ALPHA == 1
@@ -1654,14 +1859,27 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 		#endif
 //////////////////////////////////////////////////
 	
+	//Alpha RT
 	#if APPLY_ALPHA_POST_PROCESSING == 1
 	if(ART_Valid){
-	clip(Color.a < 0.1 ? -1:1);
-	
-	float2 texCoord = float2( ( IN.PPos.x/IN.PPos.w + 1.0f ) * 0.5f, 1.0f - ( IN.PPos.y/IN.PPos.w + 1.0f ) * 0.5f ) + 2;
-	float4 AlphaMaskRT = tex2Dlod(ART_Samp, float4(texCoord.xy, 0, 1));
 
-	Color.a += AlphaMaskRT * AlphaMaskRT.a;
+	float2 screenUV = float2(
+	(IN.PPos.x / IN.PPos.w) * 0.5f + 0.5f,
+	1.0f - ((IN.PPos.y / IN.PPos.w) * 0.5f + 0.5f)
+	);
+
+	float2 noiseCoord = screenUV * 512.0;
+	float hash = frac(sin(dot(noiseCoord, float2(12.9898, 78.233))) * 43758.5453);
+
+	hash = frac(hash + Time * 0.05);
+
+	if (Color.a < hash)
+	discard;
+
+	float2 texCoord = float2( ( IN.PPos.x/IN.PPos.w + 1.0f ) * 0.5f, 1.0f - ( IN.PPos.y/IN.PPos.w + 1.0f ) * 0.5f ) + 2;
+	float AlphaMaskRT = tex2Dlod(ART_Samp, float4(texCoord.xy, 0, 1));
+
+	Color.a += AlphaMaskRT.r;
 	}
 	#endif
 	
@@ -1708,10 +1926,8 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(-U,-V)).r , 0.0f)*SKII1-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(U,-V)).r , 0.0f)*SKII1-0.3f);
         }
-        float LightNormal = dot(normalize(Normal), -LightDirection);
-		
-        float SHADSmooth = smoothstep(0.0, Toon_Smooth, 1);
-        LightNormal = SHADSmooth * LightNormal;
+		float LightNormal = dot(-LightDirection, lerp(IN.Normal,Normal, 0.5) );
+		LightNormal = smoothstep(0.5 - Toon_Smooth * 0.5, 0.5 + Toon_Smooth * 0.5, LightNormal);
 		
         ShadowComp = 1-saturate(ShadowComp/9);
 		ShadowComp = min(saturate(LightNormal * Toon), ShadowComp);
@@ -1724,183 +1940,6 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	     ShadowComp = comp;
 	}
 
-//////////////////////////////////////////////////
-// IBL
-	if(IBLRT_Valid)
-	{
-	
- 	#if APPLY_SUBSURFACETOON == 0
-	float2 texCoord = float2( ( IN.PPos.x/IN.PPos.w + 1.0f ) * 0.5f, 1.0f - ( IN.PPos.y/IN.PPos.w + 1.0f ) * 0.5f ) + 2;
-	
-	float4 IBL = tex2Dlod(IBLRT_Samp, float4(texCoord.xy, 0, 1)) * 0.5 * IBL_Brightness;
-		if(SSS_Valid)
-	{
-	float4 IBL1 = tex2Dlod(IBLRT_Samp, float4(texCoord.xy, 0, 1)) * 0.5;
-	float3 IBL_B		= pow( max(0,dot( (LightDirection * float3 (1.0,-1.0,1.0)), Normal )), 1 );
-	IBL1.rgb *= IBL_B.rgb;
-	ShadowColor.rgb = lerp(ShadowColor.rgb, ShadowColor.rgb + IBL1,IBL_Intensity);
-	} else {
-	float4 IBL1 = tex2Dlod(IBLRT_Samp, float4(texCoord.xy, 0, 1)) * 1.25;
-	float3 IBL_B		= pow( max(0,dot( (LightDirection * float3 (1.0,-1.0,1.0)), Normal )), 1 );
-	IBL1.rgb *= IBL_B.rgb;
-	ShadowColor.rgb = lerp(ShadowColor.rgb, ShadowColor.rgb + IBL1,IBL_Intensity);
-	}
-
-	#if APPLY_IBL_SPECULAR == 1
-	
-	float4 IBL2 = tex2Dlod(SpecularRT_Samp, float4(texCoord.xy, 0, 1)) * IBL_Brightness;
-	float4 IBL3 = tex2Dlod(IrradianceRT_Samp, float4(texCoord.xy, 0, 1)) * IBL_Brightness;
-	
-    IBL2.rgb = IBL2.rgb + -IBL3.rgb;
-    float4 IBL4 = lerp((IBL2 + IBL3) , 0, IBL_Brightness / 100);
-	#endif
-	
-	#if APPLY_IBL_LIGHT_AMBIENT == 1
-	
-	IBL.rgb *= LightAmbient.rgb + 0.5;
-	
-	#if APPLY_IBL_SPECULAR == 1
-	IBL4.rgb *= LightAmbient.rgb + 0.5;
-	#endif
-	#endif
-	
-	Color.rgb = lerp(Color.rgb, Color.rgb * IBL.rgb, 0.25 * IBL_Intensity);
-	
-	#if APPLY_IBL_SPECULAR == 1
-	#if APPLY_ANISO == 0
-	#if APPLY_SPECULAR == 1
-	Specular.rgb = lerp(Specular.rgb, Specular.rgb * IBL4.rgb,IBL_Intensity);
-	#endif
-	#endif
-	#endif
-	
-	#if APPLY_IBL_SPECULAR == 1
-	#if APPLY_ANISO == 1
-	Aniso.rgb = lerp(Aniso.rgb, Aniso.rgb * IBL4.rgb,IBL_Intensity);
-	#endif
-	#endif
-	
-	#endif
-	
-	
-	} else {
-	//////////////////////////////////////////////////
-	// OG IBL
-	if(SSS_Valid)
-	{
-	#if APPLY_IBL == 1
-	#if APPLY_IBL_SPECULAR == 1
-	float2 texCoord2 = float2( ( IN.PPos.x/IN.PPos.w + 1.0f ) * 0.5f, 1.0f - ( IN.PPos.y/IN.PPos.w + 1.0f ) * 0.5f ) + 2;
-    float4 IBL2 = tex2Dlod(SSS_Samp, float4(texCoord2, 0, 1));
-	
-	float IBL2TC = (IBL2.r+IBL2.g+IBL2.b)/3;
-	float4 IBL2C = float4(IBL2TC,IBL2TC,IBL2TC,IBL2.a);
-		
-	IBL2 = lerp(IBL2C, IBL2, IBL2.a * 0.0);
-	
-	float4 IBL3 = texCUBElod(IBLSampler2, float4(EyeL, 0));
-    IBL2.rgb = texCUBElod(IBLSampler3, float4(EyeL, 0));
-    IBL2.rgb = IBL2.rgb + -IBL3.rgb;
-    float4 IBL4 = lerp((IBL2 + IBL3) , 0, IBL_Brightness / 100);
-	
-	#if APPLY_IBL_LIGHT_AMBIENT == 1
-	IBL4.rgb *= LightAmbient.rgb + 0.5;
-	#endif
-	
-	#if APPLY_IBL_SPECULAR == 1
-	#if APPLY_ANISO == 0
-	#if APPLY_SPECULAR == 1
-	Specular.rgb = lerp(Specular.rgb, Specular.rgb * IBL4.rgb,IBL_Intensity);
-	#endif
-	#endif
-	#endif
-	
-	#if APPLY_IBL_SPECULAR == 1
-	#if APPLY_ANISO == 1
-	Aniso.rgb = lerp(Aniso.rgb, Aniso.rgb * IBL4.rgb,IBL_Intensity);
-	#endif
-	#endif
-	
-	#endif
-	#endif
-	} else {
-	#if APPLY_IBL == 1
-	
-	#if APPLY_IBL_LIGHT_DIRECTION == 0
-	float3 IBLPos = Normal * float3(1,1,-1);
-	#endif
-	
-	#if APPLY_IBL_LIGHT_DIRECTION == 1
-    float IBLrot_x = radians(22.5);
-    float IBLrot_y = radians(-22.5);
-    float IBLrot_z = radians(45);
-	float3x3 IBLRotationX = {
-	    {1,	0,	0},
-	    {0, cos(IBLrot_x), sin(IBLrot_x)},
-	    {0, -sin(IBLrot_x), cos(IBLrot_x)},
-	};
-	float3x3 IBLRotationY = {
-	    {cos(IBLrot_y), 0, -sin(IBLrot_y)},
-	    {0, 1, 0},
-		{sin(IBLrot_y), 0,cos(IBLrot_y)},
-	    };
-	float3x3 IBLRotationZ = {
-	    {cos(IBLrot_z), sin(IBLrot_z), 0},
-	    {-sin(IBLrot_z), cos(IBLrot_z), 0},
-	    {0, 0, 1},
-	};
-	float3x3 IBLRot = RotationTransform;
-    IBLRot = mul( IBLRot, IBLRotationX );
-    IBLRot = mul( IBLRot, IBLRotationY );
-    IBLRot = mul( IBLRot, IBLRotationZ );
-	float3 IBLPos = mul(Normal* float3(1,1,-1), (float3x3)IBLRot);
-	#endif
-	
-	float4 IBL = texCUBElod(IBLSampler, float4( IBLPos, 0)) * 0.5 * IBL_Brightness;
-	float4 IBL1 = texCUBElod(IBLSampler, float4( IBLPos, 0)) * 1.25;
-	
-	#if APPLY_IBL_SPECULAR == 1
-    float4 IBL2 = texCUBElod(IBLSampler, float4(Normal, 1));
-	
-	float4 IBL3 = texCUBElod(IBLSampler2, float4(EyeL, 0));
-    IBL2.rgb = texCUBElod(IBLSampler3, float4(EyeL, 0));
-    IBL2.rgb = IBL2.rgb + -IBL3.rgb;
-    float4 IBL4 = lerp((IBL2 + IBL3) , 0, IBL_Brightness / 100);
-	#endif
-	
-	#if APPLY_IBL_LIGHT_AMBIENT == 1
-	
-	IBL.rgb *= LightAmbient.rgb + 0.5;
-	
-	#if APPLY_IBL_SPECULAR == 1
-	IBL4.rgb *= LightAmbient.rgb + 0.5;
-	#endif
-	#endif
-	
-	float3 IBL_B		= pow( max(0,dot( (LightDirection * float3 (1.0,-1.0,1.0)), Normal )), 1 );
-	IBL1.rgb *= IBL_B.rgb;
-	
-	Color.rgb = lerp(Color.rgb, Color.rgb * IBL.rgb, 0.25 * IBL_Intensity);
-	ShadowColor.rgb = lerp(ShadowColor.rgb, ShadowColor.rgb + IBL1,IBL_Intensity);
-	
-	#if APPLY_IBL_SPECULAR == 1
-	#if APPLY_ANISO == 0
-	#if APPLY_SPECULAR == 1
-	Specular.rgb = lerp(Specular.rgb, Specular.rgb * IBL4.rgb,IBL_Intensity);
-	#endif
-	#endif
-	#endif
-	
-	#if APPLY_IBL_SPECULAR == 1
-	#if APPLY_ANISO == 1
-	Aniso.rgb = lerp(Aniso.rgb, Aniso.rgb * IBL4.rgb,IBL_Intensity);
-	#endif
-	#endif
-	
-	#endif
-	}
-	//////////////////////////////////////////////////
-	}
 //////////////////////////////////////////////////
 //SubSurfaceToon
 
@@ -1942,10 +1981,13 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 //////////////////////////////////////////////////
 
 	#if SHADER_TYPE == 1
-	float3 HalfLambert = min(pow(dot(Normal, -LightDirection) * 0.5 + 0.5, 2) * 0.5 + 0.5, (1,1,ShadowComp));
-	HalfLambert = pow(HalfLambert * 0.5 + 0.5, 1.0) * (HalfLambert.rgb = pow(HalfLambert, ShadowColor * HalfLambert * 0.5 + 0.5));
+	float NdotL = dot(Normal, -LightDirection);
+	float HalfLambert = saturate(NdotL * 0.5 + 0.5);
+	HalfLambert = pow(HalfLambert, Toon_Gradient);
 	
-	ShadowComp = HalfLambert;
+	HalfLambert = smoothstep(0.5 - Toon_Smooth * 0.5, 0.5 + Toon_Smooth * 0.5, HalfLambert);
+	
+	ShadowComp = lerp(ShadowComp, ShadowComp, HalfLambert);
 	#endif
 
 //////////////////////////////////////////////////
@@ -1984,18 +2026,6 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 		float2 texCoord = float2( ( IN.PPos.x/IN.PPos.w + 1.0f ) * 0.5f, 1.0f - ( IN.PPos.y/IN.PPos.w + 1.0f ) * 0.5f ) + 2;
 		float4 SSSM = tex2Dlod(SSS_Samp, float4(texCoord.xy, 0, 1));
 		
-		#if APPLY_SUBSURFACETOON == 0
-		#if APPLY_SUBSURFACETOON_FILTER_SHADOW == 1
-		float SSSTC = (SSSM.r+SSSM.g+SSSM.b)/3;
-		float4 SSSC = float4(SSSTC,SSSTC,SSSTC,SSSM.a);
-		
-		SSSM = lerp(SSSC, SSSM, SSSM.a * 0.0);
-		
-		Color.rgb = lerp(Color.rgb, Color.rgb * SSSM.rgb,SubSurfaceToon_Intensity);
-		ShadowColor.rgb = lerp(ShadowColor.rgb, ShadowColor.rgb * SSSM.rgb, 0.5 * SubSurfaceToon_Intensity);
-		#endif
-		#endif
-		
 		#if APPLY_SUBSURFACETOON == 1
 		float SSSTC = (SSSM.r+SSSM.g+SSSM.b)/3;
 		float4 SSSC = float4(SSSTC,SSSTC,SSSTC,SSSM.a);
@@ -2014,8 +2044,8 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 //////////////////////////////////////////////////
 	
 	#if APPLY_TONE_MAP == 1
-	Color.rgb += Brightness_Plus;
-	Color.rgb -= Brightness_Less;
+	Color.rgb += clamp(Brightness_Plus * 2,0.0,2.0);
+	Color.rgb *= 1 - clamp(Brightness_Less,0.0,1.0);
 	Transparency = 1 + -Transparency;
 	float3 scene_tone		= ColorToneMapping(Color.rgb);
 	Color.rgb				= lerp(Color.rgb,scene_tone,Tone_Map_Intensity * Transparency);
@@ -2028,7 +2058,19 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Techniques
-technique PGTech  < string MMDPass = "object_ss"; > {
+technique PGTech  < string MMDPass = "object_ss";
+
+	string Script =
+	
+	"Pass=DrawObject;"
+	
+	#if APPLY_DOUBLE_FACE == 1
+	"Pass=DrawObjectDouble;"
+	#endif
+	
+	;
+
+> {
     pass DrawObject {
 		#if BLEND_APPLY == 1
 		
@@ -2162,6 +2204,148 @@ technique PGTech  < string MMDPass = "object_ss"; > {
         VertexShader = compile vs_3_0 BufferShadow_VS();
         PixelShader  = compile ps_3_0 BufferShadow_PS();
     }
+	
+	//Double Face
+	
+	#if APPLY_DOUBLE_FACE == 1
+	
+	pass DrawObjectDouble {
+		CULLMODE = CW;
+	
+		#if BLEND_APPLY == 1
+		
+		#if SRC_BLEND_TYPE == 0
+		SRCBLEND = ZERO;
+		#endif
+		#if SRC_BLEND_TYPE == 1
+		SRCBLEND = ONE;
+		#endif
+		#if SRC_BLEND_TYPE == 2
+		SRCBLEND = SrcColor;
+		#endif
+		#if SRC_BLEND_TYPE == 3
+		SRCBLEND = INVSrcColor;
+		#endif
+		#if SRC_BLEND_TYPE == 4
+		SRCBLEND = SrcAlpha;
+		#endif
+		#if SRC_BLEND_TYPE == 5
+		SRCBLEND = INVSrcAlpha;
+		#endif
+		#if SRC_BLEND_TYPE == 6
+		SRCBLEND = DestAlpha;
+		#endif
+		#if SRC_BLEND_TYPE == 7
+		SRCBLEND = INVDestAlpha;
+		#endif
+		#if SRC_BLEND_TYPE == 8
+		SRCBLEND = DestColor;
+		#endif
+		#if SRC_BLEND_TYPE == 9
+		SRCBLEND = INVDestColor;
+		#endif
+
+		#if DEST_BLEND_TYPE == 0
+		DESTBLEND = ZERO;
+		#endif
+		#if DEST_BLEND_TYPE == 1
+		DESTBLEND = ONE;
+		#endif
+		#if DEST_BLEND_TYPE == 2
+		DESTBLEND = SrcColor;
+		#endif
+		#if DEST_BLEND_TYPE == 3
+		DESTBLEND = INVSrcColor;
+		#endif
+		#if DEST_BLEND_TYPE == 4
+		DESTBLEND = SrcAlpha;
+		#endif
+		#if DEST_BLEND_TYPE == 5
+		DESTBLEND = INVSrcAlpha;
+		#endif
+		#if DEST_BLEND_TYPE == 6
+		DESTBLEND = DestAlpha;
+		#endif
+		#if DEST_BLEND_TYPE == 7
+		DESTBLEND = INVDestAlpha;
+		#endif
+		#if DEST_BLEND_TYPE == 8
+		DESTBLEND = DestColor;
+		#endif
+		#if DEST_BLEND_TYPE == 9
+		DESTBLEND = INVDestColor;
+		#endif
+		
+		#endif
+
+		#if ALPHA_BLEND_APPLY == 1
+		
+		#if ALPHA_BLEND_TYPE == 1
+		ALPHABLENDENABLE = FALSE;
+		#endif
+		
+		#if ALPHA_BLEND_TYPE == 2
+		ALPHABLENDENABLE = TRUE;
+		#endif
+		
+		#endif
+		
+		#if ALPHA_TEST_APPLY == 1
+		
+		#if ALPHA_TEST_TYPE == 1
+		ALPHATESTENABLE = FALSE;
+		#endif
+
+		#if ALPHA_TEST_TYPE == 2
+		ALPHATESTENABLE = TRUE;
+		#endif
+
+		#endif
+		
+		#if Z_WRITE_APPLY == 1
+		
+		#if Z_WRITE_TYPE == 1
+		ZWRITEENABLE = FALSE;
+		#endif
+		
+		#if Z_WRITE_TYPE == 2
+		ZWRITEENABLE = TRUE;
+		#endif
+		
+		#endif
+		
+		#if Z_ENABLE_APPLY == 1
+		
+		#if Z_TYPE == 1
+		ZENABLE = FALSE;
+		#endif
+		
+		#if Z_TYPE == 2
+		ZENABLE = TRUE;
+		#endif
+		
+		#endif
+		
+		#if CULLMODE_APPLY == 1
+		
+		#if CULLMODE_TYPE == 0
+		CULLMODE = NONE;
+		#endif
+		
+		#if CULLMODE_TYPE == 1
+		CULLMODE = CW;
+		#endif
+		
+		#if CULLMODE_TYPE == 2
+		CULLMODE = CCW;
+		#endif
+		
+		#endif
+        VertexShader = compile vs_3_0 BufferShadow_VS();
+        PixelShader  = compile ps_3_0 BufferShadow_PS();
+    }
+	
+	#endif
 }
 
 

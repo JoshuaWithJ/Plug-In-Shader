@@ -60,7 +60,7 @@ float Texture_Brightness = 2.0;
 // Toon
 float Toon_Gradient = 1.0;
 float Toon_Smooth = 2.0;
-float Toon_Intensity = 0.2625;
+float Toon_Intensity = 1.0;
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Back Light Color
@@ -88,13 +88,13 @@ float Front_Light_Size   = 1.0;
 
 #define APPLY_DETAIL_NORMALMAP  0
 #define APPLY_ANIMATED_DETAIL_NORMALMAP 0
-#define DetailNormalMap_Texture "n.png";
+#define DetailNormalMap_Texture "nd.png";
 
 #define FLIP_NORMALMAP 0
 float NormalMap_Intensity = 0.5;
 
 float Detail_NormalMap_Intensity = 1.0;
-float Detail_NormalMap_Scale = 2;
+float Detail_NormalMap_Scale = 1;
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Specular Map
@@ -162,6 +162,9 @@ float4 Transparency_Color = float4(1, 1, 1, 1);
 float Specular_Shininess = 1.0;
 
 float4 Specular_Color = float4(1.0, 1.0, 1.0, 1);
+
+float Specular_Pos_X = 0.0;
+float Specular_Pos_Y = 50.0;
 
 //////////////////////////////////////////////////////////////////////////////////////
 //Aniso
@@ -321,6 +324,17 @@ float3 Ambient_Occlussion_Color = float3(0,0,0);
 float IBL_Intensity = 1.0;
 float IBL_Shadow_Intensity = 1.0;
 float IBL_Brightness = 1.0;
+
+//////////////////////////////////////////////////////////////////////////////////////
+// Eye Mask
+
+#define APPLY_EYEMASK 1
+#define EyeMask_Texture "E.png";
+
+// TYPE 0 = Multiply
+// TYPE 1 = Add
+
+#define EYEMASK_TYPE 1
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Billboard

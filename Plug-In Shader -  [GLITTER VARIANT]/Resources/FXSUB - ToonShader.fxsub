@@ -526,7 +526,7 @@ bool	spadd;    // Sphere map additive composition flag
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //NormalMap
-    #if APPLY_NORMALMAP == 1
+
 float3x3 compute_tangent_frame(float3 N, float3 p, float2 uv)
 {
     float3 dp1 = ddx( p );
@@ -548,7 +548,7 @@ float3x3 compute_tangent_frame(float3 N, float3 p, float2 uv)
     float invmax = rsqrt( max( dot(T,T), dot(B,B) ) );
     return float3x3( T * invmax, B * -invmax, N );
 }
-    #endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if APPLY_BILLBOARD == 1
@@ -676,7 +676,7 @@ BufferShadow_OUTPUT BufferShadow_VS(BufferShadow_INPUT IN)
 	#endif
 	#endif
 	
-	Out.PosWorld = mul( IN.Pos, WorldMatrix );
+	Out.PosWorld = mul(IN.Pos, WorldMatrix);
 	
 	// HgShadow
 	Out.PPos = Out.Pos;
@@ -712,6 +712,55 @@ float3x3 Set_Rotation(float3 in_axis, float s, float c)
 	float rand(float2 co) {
     return frac(sin(dot(co * 16, float2(12.9898, 78.233))) * 43758.5453);
 }
+//////////////////////////////////////////////////
+
+float2 hash2(float2 p)
+{
+    p = float2(dot(p, float2(127.1, 311.7)),
+               dot(p, float2(269.5, 183.3)));
+    return frac(sin(p) * 43758.5453);
+}
+
+// Hash that gives random float3 color in [0,1]
+float3 hash3(float2 p)
+{
+    float3 q = float3(dot(p, float2(127.1, 311.7)),
+                      dot(p, float2(269.5, 183.3)),
+                      dot(p, float2(419.2, 371.9)));
+    return frac(sin(q) * 43758.5453);
+}
+
+float3 voronoiColor(float2 uv)
+{
+    float2 g = floor(uv);  // base grid cell
+    float2 f = frac(uv);   // fractional position
+    
+    float minDist = 1.0;
+    float3 cellColor = 0;
+    
+    // Check neighbors
+    [unroll]
+    for (int y = -1; y <= 1; y++)
+    {
+        [unroll]
+        for (int x = -1; x <= 1; x++)
+        {
+            float2 neighbor = float2(x, y);
+            float2 rnd = hash2(g + neighbor);
+            float2 diff = neighbor + rnd - f;
+            float d = dot(diff, diff);
+            
+            if (d < minDist)
+            {
+                minDist = d;
+                cellColor = hash3(g + neighbor); // use hash as cell color
+            }
+        }
+    }
+    
+    return cellColor;
+}
+
 //////////////////////////////////////////////////
 
 	#if APPLY_TONE_MAP == 1
@@ -991,6 +1040,27 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	#endif
 	
 //////////////////////////////////////////////////
+// Glitter
+
+	#if APPLY_GLITTER == 1
+	float2 GlitterUV = UV * Glitter_Scale;
+	float3 d = voronoiColor(GlitterUV);
+	
+	float3 GlitterNormalMap		= d;	
+	float3x3 GlittertangentFrame	= compute_tangent_frame(Normal, IN.PosWorld.xyz, IN.UV);
+	GlitterNormalMap.z				-= Glitter_Normal_Intensity;
+	
+	float3 GlitterN = normalize(mul((GlitterNormalMap * 2.0 - 1.0), GlittertangentFrame));
+	Normal = normalize(Normal + GlitterN * Glitter_Normal_Intensity);
+
+	
+	float3 ReflectColor = lerp(0.04, Color.rgb, Metallic);
+	float3 ReflectFresnel = ReflectColor + (1 - ReflectColor) * pow(1 - saturate(dot(Normal, IN.PosWorld)), 5);
+
+	Color.rgb = lerp(Color.rgb,Color.rgb * d.rgb,Glitter_Intensity);
+	#endif
+	
+//////////////////////////////////////////////////
 //Specular Map
 
 	#if APPLY_SPECULARMAP == 1
@@ -1102,6 +1172,11 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	sphTex.y = sphTex.y * -0.5f + 0.5f;
 	float4 SPAMap = tex2D(ObjSphareSampler,sphTex) * 1;
 	
+	#if APPLY_GLITTER == 1
+	float4 SPAMapG = tex2D(ObjSphareSampler,sphTex) * 1;
+	Color.rgb = lerp(Color.rgb , SPAMapG.rgb * ReflectFresnel, Metallic);
+	#endif
+	
 	#if APPLY_SPECULARMAP == 1
 	SPAMap.rgb *= SpecularMap.a;
 	#endif
@@ -1127,6 +1202,11 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	#endif
 	
 	float4 CubeMap = texCUBE(CubeMapSampler, CubeMapReflection);
+	
+	#if APPLY_GLITTER == 1
+	float4 CubeMapG = texCUBE(CubeMapSampler, CubeMapReflection);
+	Color.rgb = lerp(Color.rgb , CubeMapG.rgb * ReflectFresnel, Metallic);
+	#endif
 	
 	#if APPLY_SPECULARMAP == 1
 	CubeMap.rgb *= SpecularMap.a;
@@ -1175,6 +1255,22 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	#if APPLY_REFRACTION_REFLECTION == 1
 	float4 RefractedColor = texDP(sampEnvMapF, sampEnvMapB, Refract) * Refraction_Intensity;
 	#endif
+	#endif
+	
+	#if APPLY_GLITTER == 1
+	#if APPLY_REFRACTION == 1
+	#if APPLY_REFRACTION_REFLECTION == 0
+	float4 RefractedColorG = texCUBE(Refraction_Sampler, Refract) * Refraction_Intensity;
+	#endif
+	#endif
+
+	#if APPLY_REFRACTION == 1
+	#if APPLY_REFRACTION_REFLECTION == 1
+	float4 RefractedColorG = texDP(sampEnvMapF, sampEnvMapB, Refract) * Refraction_Intensity;
+	#endif
+	#endif
+	
+	Color.rgb = lerp(Color.rgb , RefractedColorG.rgb * ReflectFresnel, Metallic);
 	#endif
 	
 		#if APPLY_REFRACTION == 1
@@ -1548,17 +1644,23 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	Ref.rgb = lerp(Ref.rgb,1,Specular);
 	#endif
 	#endif
+	#if APPLY_GLITTER == 0
 	#if APPLY_SPA == 1
 	Color.rgb = lerp(Color.rgb,1,SPAMap);
+	#endif
 	#endif
 	#if APPLY_RIMLIGHT_TYPE == 1
 	Ref.rgb = lerp(Ref.rgb,1,RimLight);
 	#endif
+	#if APPLY_GLITTER == 0
 	#if APPLY_CUBEMAP == 1
 	Color.rgb = lerp(Color.rgb,1,CubeMap);
 	#endif
+	#endif
+	#if APPLY_GLITTER == 0
 	#if APPLY_REFRACTION == 1
 	Ref.rgb = lerp(Ref.rgb,1,RefractedColor);
+	#endif
 	#endif
 	#if APPLY_RIMLIGHT_TYPE == 2
 	Ref.rgb = lerp(Ref.rgb,1,Fresnel);
@@ -1591,17 +1693,23 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	Ref.rgb += Specular;
 	#endif
 	#endif
+	#if APPLY_GLITTER == 0
 	#if APPLY_SPA == 1
 	Color.rgb += SPAMap;
+	#endif
 	#endif
 	#if APPLY_RIMLIGHT_TYPE == 1
 	Ref.rgb += RimLight;
 	#endif
+	#if APPLY_GLITTER == 0
 	#if APPLY_CUBEMAP == 1
 	Color.rgb += CubeMap;
 	#endif
+	#endif
+	#if APPLY_GLITTER == 0
 	#if APPLY_REFRACTION == 1
 	Color.rgb += RefractedColor;
+	#endif
 	#endif
 	#if APPLY_RIMLIGHT_TYPE == 2
 	Ref.rgb += Fresnel;

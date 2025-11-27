@@ -14,6 +14,35 @@ float Saturation = 1.0;
 float Gama = 1.0;
 
 //////////////////////////////////////////////////////////////////////////////////////
+// Hair Layer
+
+int Hair_Layer_Multiplication = 2;
+
+float Hair_Height = 0.04;
+
+float Alpha_Intensity        = 1.0;
+
+//////////////////////////////////////////////////////////////////////////////////////
+//Alpha Mask Hair Overlay
+//Alpha Mask UV 0 = UV
+//Alpha Mask UV 1 = UV1
+
+#define APPLY_ALPHA_MASK_LAYER  1
+#define APPLY_ALPHA_MASK_LAYER_UV 0
+#define Alpha_Mask_L_Texture "Alpha.png";
+
+#define APPLY_ALPHA_MASK_LAYER_RGB_CHANNELS 0
+
+#define R_CHANNEL_ALPHA_MASK_LAYER 0
+#define G_CHANNEL_ALPHA_MASK_LAYER 0
+#define B_CHANNEL_ALPHA_MASK_LAYER 0
+
+float ALPHA_MASK_LAYER_Intensity	= 1.0;
+
+float ALPHA_MASK_LAYER_Scale_X	= 1.5;
+float ALPHA_MASK_LAYER_Scale_Y	= 1.5;
+
+//////////////////////////////////////////////////////////////////////////////////////
 // Light Ambient
 
 #define APPLY_LIGHT_AMBIENT 1
@@ -60,7 +89,7 @@ float Texture_Brightness = 2.0;
 // Toon
 float Toon_Gradient = 1.0;
 float Toon_Smooth = 2.0;
-float Toon_Intensity = 0.2625;
+float Toon_Intensity = 1.0;
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Back Light Color
@@ -88,13 +117,13 @@ float Front_Light_Size   = 1.0;
 
 #define APPLY_DETAIL_NORMALMAP  0
 #define APPLY_ANIMATED_DETAIL_NORMALMAP 0
-#define DetailNormalMap_Texture "n.png";
+#define DetailNormalMap_Texture "nd.png";
 
 #define FLIP_NORMALMAP 0
 float NormalMap_Intensity = 0.5;
 
 float Detail_NormalMap_Intensity = 1.0;
-float Detail_NormalMap_Scale = 2;
+float Detail_NormalMap_Scale = 1;
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Specular Map
@@ -113,7 +142,7 @@ float Alpha_Clip        = 0.0; //Set a value from 0 to 1
 //////////////////////////////////////////////////////////////////////////////////////
 // Alpha Post Processing (Render Target)
 
-#define APPLY_ALPHA_POST_PROCESSING 0
+#define APPLY_ALPHA_POST_PROCESSING 1
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Alpha Color Channel

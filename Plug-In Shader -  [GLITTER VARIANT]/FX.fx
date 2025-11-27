@@ -12,7 +12,6 @@ float Tone_Map_Intensity    = 1.0;
 float Exposure    = 2.0;
 float Saturation = 1.0;
 float Gama = 1.0;
-
 //////////////////////////////////////////////////////////////////////////////////////
 // Light Ambient
 
@@ -88,13 +87,13 @@ float Front_Light_Size   = 1.0;
 
 #define APPLY_DETAIL_NORMALMAP  0
 #define APPLY_ANIMATED_DETAIL_NORMALMAP 0
-#define DetailNormalMap_Texture "n.png";
+#define DetailNormalMap_Texture "nd.png";
 
 #define FLIP_NORMALMAP 0
 float NormalMap_Intensity = 0.5;
 
 float Detail_NormalMap_Intensity = 1.0;
-float Detail_NormalMap_Scale = 2;
+float Detail_NormalMap_Scale = 1.0;
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Specular Map
@@ -156,12 +155,12 @@ float4 Transparency_Color = float4(1, 1, 1, 1);
 //////////////////////////////////////////////////////////////////////////////////////
 // Specular
 
-#define APPLY_SHADER_SPECULAR 0
+#define APPLY_SHADER_SPECULAR 1
 #define APPLY_SPECULAR 1
 
-float Specular_Shininess = 1.0;
+float Specular_Shininess = 10.0;
 
-float4 Specular_Color = float4(1.0, 1.0, 1.0, 1);
+float4 Specular_Color = float4(.1, .1, .1, 1);
 
 //////////////////////////////////////////////////////////////////////////////////////
 //Aniso
@@ -184,7 +183,7 @@ float3 Aniso_Softness = 1.0;
 #define APPLY_SPA 0
 
 // CubeMap
-#define APPLY_CUBEMAP 0
+#define APPLY_CUBEMAP 1
 #define APPLY_CUBEMAP_LIGHT_DIRECTION 1
 #define CubeMap_Texture "CubeMap.dds";
 
@@ -192,7 +191,7 @@ float3 Aniso_Softness = 1.0;
 //Refraction
 
 #define APPLY_REFRACTION 0
-#define APPLY_REFRACTION_REFLECTION 0
+#define APPLY_REFRACTION_REFLECTION 1
 
 #define APPLY_REFRACTION_LIGHT_DIRECTION 0
 #define APPLY_REFRACTION_SPECULARMAP 0
@@ -233,7 +232,7 @@ float RimShadow_Intensity = 1.0;
 
 float RimShadow_Smooth = 2.0;
 
-float RimShadow_Direction = -2;
+float RimShadow_Direction = -0.5;
 
 float3 RimShadow_Color = float3(1.0,1.0,1.0);
 
@@ -328,6 +327,18 @@ float IBL_Brightness = 1.0;
 #define APPLY_BILLBOARD 0
 #define Billboard_Model_Name "(self)"
 #define Billboard_Bone_Name "BILLBOARD" 
+
+//////////////////////////////////////////////////////////////////////////////////////
+// Glitter
+
+#define APPLY_GLITTER 1
+float Glitter_Scale = 500.0;
+
+float Glitter_Intensity = 0.5;
+
+float Metallic = 1.0;
+
+float Glitter_Normal_Intensity = 0.5;
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Blend Type

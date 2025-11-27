@@ -26,6 +26,7 @@ Transparency Mask by Joshua
 Alpha Mask by Joshua
 Eye Mask by Joshua
 Hair Layer by Joshua / pmot
+Point Lights by Joshua / Infu_D
 //////////////////////////////////////////////////////////////////////////////////////
 - GENERAL -
 
@@ -150,6 +151,10 @@ Hair Layer by Joshua / pmot
 	You can also flip the depth of the map in case of you needing it.
 	
 	-	Normal Map Intensity: It allows you change the intensity of the depth on the map.
+	
+	-	Detail Normal Map Intensity: It allows you change the intensity of the depth on the map.
+	
+	-	Detail Normal Map Scale: It allows you change the scale of the map.
 //////////////////////////////////////////////////////////////////////////////////////
 - Specular Map
 
@@ -169,8 +174,8 @@ Hair Layer by Joshua / pmot
 - Alpha Post Processing (Render Target)
 
 	This option allows you to change the alpha processing into a render target, which
-	allows you to have better result on materials who uses alpha for example:
-	Hairs, Plastic Materials, Fur, Glass Materials, etc.
+	allows you to have better result on materials who relay in alpha for example:
+	Hairs, Fur, etc.
 
 	To load the Alpha Render Target, Load the AlphaRT.x that's on the "ADD-ONS" folder.
 
@@ -411,13 +416,11 @@ Hair Layer by Joshua / pmot
 	
 	NOTE:	YOU HAVE TO ACTIVATE THE SUBSURFACETOON OPTION FIRST, The SubSurfaceToon Filter
 			will activate automatically once you load the .x accessory.
-
-	APPLY SUBSURFACETOON FILTER SHADOW: This option let you choose use the
-										Uncolored shadow the SubSurfaceToon Filter
-										gives on models that don't have SubSurfaceToon
-										activated. (Not recommended on stages)
 										
 	SubSurfaceToon Saturation: This option allows you to change the saturation of the
+							   SubSurfaceToon Filter. You can change it as you wish.
+							   
+	SubSurfaceToon Intensity: This option allows you to change the Intensity of the
 							   SubSurfaceToon Filter. You can change it as you wish.
 							   
 //////////////////////////////////////////////////////////////////////////////////////
@@ -578,7 +581,9 @@ Hair Layer by Joshua / pmot
 	Destination Blend Factor = DEST_BLEND_TYPE
 	
 //////////////////////////////////////////////////////////////////////////////////////
- - EYE VARIATION EXCLUSIVE OPTIONS -
+//////////////////////////////////////////////////////////////////////////////////////
+ - EYE VARIANT EXCLUSIVE OPTIONS -
+//////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
 - Eye Mask
 
@@ -591,4 +596,24 @@ Hair Layer by Joshua / pmot
 	Specular Pos X/Y:	Inspired on DIVA, This option allows you move the secondary
 						specular from it's place to add more detail to the eye.
 						
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+ - GLITTER VARIANT EXCLUSIVE OPTIONS - ( NEW )
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+- Glitter
+
+	This variant allows you to make glitter materials as well as customizing them as
+	you like. No need of maps at first but for further customization is recommended.
+	
+	NOTES: Environment Maps are highly recommended to be used! (Cubemaps, Spas, etc.)
+	
+	Glitter_Scale: Scale of the glitter pattern in the model. (UV Space)
+	
+	Glitter_Intensity: Intensity of the RGB pattern color.
+	
+	Metallic: Glitter's Metallic effect intensity.
+	
+	Glitter_Normal_Intensity: Glitter's NormalMap pattern depth.
+
 //////////////////////////////////////////////////////////////////////////////////////

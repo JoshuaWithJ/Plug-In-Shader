@@ -429,6 +429,24 @@ sampler IBLSampler3 = sampler_state {
 #endif
 #endif
 
+
+//Eye Mask
+#if APPLY_EYEMASK == 1
+texture2D EyeMask <
+    string ResourceName = EyeMask_Texture
+    >;
+sampler EyeMask_Sampler = sampler_state {
+    texture   = <EyeMask>;
+    MINFILTER = ANISOTROPIC;
+    MAGFILTER = ANISOTROPIC;
+    MIPFILTER = ANISOTROPIC;
+    ADDRESSU  = WRAP;
+    ADDRESSV  = WRAP;
+	ADDRESSW  = WRAP;
+	MAXANISOTROPY = 16;
+};
+#endif
+
 #if APPLY_ALPHA_POST_PROCESSING == 1
 
 #define AlphaRT_Control  "AlphaRT.x"
@@ -1025,6 +1043,40 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	#endif
 
 //////////////////////////////////////////////////
+//Specular 1
+	#if APPLY_ANISO == 0
+	
+	float3 lightDir = normalize(LightDirection);
+	float3 viewDir  = normalize(Eye);
+
+	float3 h = HalfVector;
+
+	h.xy += float2(Specular_Pos_X, Specular_Pos_Y) * 0.05; // Adjust strength here
+	h = normalize(h);
+
+	#if APPLY_SHADER_SPECULAR == 0
+	float3 Specular1		= pow( max(0,dot(Normal,h)), SpecularPower * float(0.5) ) * SpecularColor;
+	Specular1 = step( 0.5 , Specular1) ? 1 : 0;
+	#endif
+	
+	#if APPLY_SHADER_SPECULAR == 1
+	float3 Specular1		= pow( max(0,dot(Normal,h)), Specular_Shininess * float(0.5));
+	Specular1 = step( 0.5 , Specular1) ? 1 : 0;
+	#endif
+	
+	#if APPLY_SPECULARMAP == 1
+	Specular1.rgb		*= SpecularMap.rgb + SpecularMap.rgb;
+	#endif
+	
+	#if APPLY_SHADER_SPECULAR == 1
+	Specular1.rgb *= Specular_Color.rgb;
+	#endif
+	
+	Specular1 *= 1.5 * LightAmbient;
+	
+	#endif
+	
+//////////////////////////////////////////////////
 //RimLight
 	
 	#if APPLY_RIMLIGHT_TYPE == 1
@@ -1546,6 +1598,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	#if APPLY_ANISO == 0
 	#if APPLY_SPECULAR == 1
 	Ref.rgb = lerp(Ref.rgb,1,Specular);
+	Ref.rgb = lerp(Ref.rgb,1,Specular1);
 	#endif
 	#endif
 	#if APPLY_SPA == 1
@@ -1589,6 +1642,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	#if APPLY_ANISO == 0
 	#if APPLY_SPECULAR == 1
 	Ref.rgb += Specular;
+	Ref.rgb += Specular1;
 	#endif
 	#endif
 	#if APPLY_SPA == 1
@@ -1916,6 +1970,39 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	#endif
 	
 //////////////////////////////////////////////////
+
+		#if APPLY_ALPHA_MASK == 1
+		Color.a   *= AlphaMask;
+		#endif
+	
+//////////////////////////////////////////////////
+
+	#if APPLY_EYEMASK == 1
+	float4 EyeMask = tex2D(EyeMask_Sampler, IN.UV);
+	
+	#if EYEMASK_TYPE == 0
+	Color.rgb = lerp(Color.rgb,1,EyeMask.rgb * EyeMask.a * 2);
+	#endif
+	
+	#if EYEMASK_TYPE == 1
+	Color += EyeMask * EyeMask.a * 2;
+	#endif
+	
+	#endif
+	
+//////////////////////////////////////////////////
+	
+	#if APPLY_ALPHA == 1
+	Color.a *= DiffuseColor.a;
+	ShadowColor.a *= DiffuseColor.a;
+	
+	#if APPLY_VERTEXCOLOR == 1
+	Color.a *= VertexColor.a;
+	#endif
+	
+	#endif
+	
+//////////////////////////////////////////////////
 //Shadow
 //////////////////////////////////////////////////
     // Convert to texture coordinates
@@ -1953,15 +2040,16 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(-U,-V)).r , 0.0f)*SKII1-0.3f);
 	        ShadowComp += saturate(max(IN.ZCalcTex.z-tex2D(DefSampler,TransTexCoord+float2(U,-V)).r , 0.0f)*SKII1-0.3f);
         }
-		float LightNormal = dot(-LightDirection, lerp(IN.Normal,Normal, 0.5) );
+		float LightNormal = dot(-LightDirection, IN.Normal );
 		LightNormal = smoothstep(0.5 - Toon_Smooth * 0.5, 0.5 + Toon_Smooth * 0.5, LightNormal);
 		
         ShadowComp = 1-saturate(ShadowComp/9);
 		ShadowComp = min(saturate(LightNormal * Toon), ShadowComp);
+
 //////////////////////////////////////////////////
 	if(HgShadow_Valid)
 	{
-		float comp = HgShadow_GetSelfShadowRate(IN.PPos);
+        float comp = HgShadow_GetSelfShadowRate(IN.PPos);
 		comp = min(saturate(LightNormal * Toon), comp);
 		ShadowComp = comp;
 		ShadowComp = step( 0.5 , ShadowComp) ? 1 : 0;
@@ -2019,7 +2107,7 @@ float4 BufferShadow_PS(BufferShadow_OUTPUT IN) : COLOR
 
 //////////////////////////////////////////////////
 //Shadow Color
-	
+
 	#if APPLY_TINT == 0
 	#if APPLY_BACK_LIGHT == 1
 	ShadowColor.rgb =  lerp(ShadowColor.rgb,1,Back_Light.rgb);
