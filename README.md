@@ -1,5 +1,5 @@
 # PLUG-IN 💙
-![](https://i.imgur.com/HUnoAcK.png)
+![](https://i.imgur.com/ga5fJzu.jpeg)
 
 # GET EARLY ACCESS TO PLUG-IN's NEW VERSIONS ON: 💙
 - [Patreon](patreon.com/c/JoshuaWithJ)
@@ -47,6 +47,9 @@
 - Subsurface scattering Post Processing.
 - IBL Post Processing.
 - Alpha Post Processing.
+- Point Lights.
+  [Different Variants]
+- VARIANTS: Glitter, Hair Layer, Eyes.
 
 # RULES: 💙
 - You are free to use it in any kind or type of models.
@@ -82,6 +85,7 @@
 - Eye Mask by Joshua
 - Hair Layer by Joshua / pmot
 - HgShadow by 針金P
+- Point Lights by Joshua / Infu_D
 
 # SPECIALS THANKS: 💙
 - [Infu_D](https://github.com/Infused-Doggo): For features supports, guides, advice and general assistance.
